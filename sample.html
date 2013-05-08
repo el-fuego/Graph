@@ -13,29 +13,43 @@
 </head>
 <body>
 
+	<div id="graph-container"></div>
 	<script type="text/javascript">
 	
 	$(function(){
 
         // Строим круговую диаграмму
         (new Graph ({
-            el:    'body',
+            el:    '#graph-container',
             width:  300,
             height: 300
         })).renderCircleDiagram([2, 5, 7, 3, 5]);
 
 
 		// Строим график
-		(new Graph ({
-			el: 'body'
-		})).renderLine([{value: 1, options: {'class': 'first'}}, 5, 6, 3, 5, 9, 7, 8, 2]);
-
+		var myGraph = new Graph ({
+			el: '#graph-container'
+		});
+        var values = [{value: 1, 'class': 'first'}, 5, 6, 3, 5, 9, 7, 8, 2];
+        myGraph.renderShape(values);
+        myGraph.renderLine(values);
+        myGraph.renderPoints(values);
 
 
 		// Строим диаграмму
 		(new Graph ({
-			el: 'body'
-		})).renderDiagram([1, 5, 6, 3, {value: 5, options: {'id': 'wow'}}, 9, 7, 8, {value: 2, options: {'class': 'last'}}]);
+			el: '#graph-container',
+            width:  500,
+            height: 200
+		})).renderRectDiagram([1, 5, 6, 3, {value: 5, 'id': 'wow'}, 9, 7, {value: 2, 'class': 'last'}], {
+            step: function (val, i) {
+                return !(i % 2) ? 1 : 20;
+            },
+			width:       480,
+			height:      180,
+			paddingLeft: 10,
+			paddingTop:  10
+		});
 	})
 	</script>
 </body>

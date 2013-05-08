@@ -19,11 +19,7 @@ window.Graph = function (options) {
 
     // применим настройки
     this.$el = $(options.el || options.$el);
-    this.options = $.extend({}, this.options, options);
-
-    // Вычислим размер рабочей области
-    this.options.workspaceWidth = this.options.width - this.options.paddingX * 2
-    this.options.workspaceHeight = this.options.height - this.options.paddingY * 2
+    this.options = _.extend({}, this.options, options);
 
     // Создадим чистую рабочую область
     this.clear();
@@ -43,15 +39,21 @@ window.Graph.prototype = {
         width:         450,
         height:        140,
 
-        // Отступы по краям
-        paddingX:      10,
-        paddingY:      10,
+        // Отступы
+        paddingLeft:   10,
+        paddingTop:    10,
 
         // Размер точки на линейном графике
         pointDiameter: 8,
 
         // Расстояние между столбцами
-        diagramStep:   5
+        rectStep:   5,
+		
+		// классы
+		rectDiagramClass: 	'rect-diagram',
+		circleDiagramClass: 'circle-diagram',
+		rectClass: 			'rect',
+		sectorClass: 		'sector'
     },
 
 
@@ -73,7 +75,7 @@ window.Graph.prototype = {
         }
 
         $($container || this.$workspace).append(el);
-        return el;
+        return $(el);
     },
 
 
@@ -85,21 +87,24 @@ window.Graph.prototype = {
      @param {String} startDegree
      @param {String} endDegree
      @param {Object} [attributes]
+     @param {Object} [$group]
      @private
      */
-    _renderSector: function (centerX, centerY, radius, startDegree, endDegree, attributes) {
-
-        return this._render('path', $.extend(
+	_renderSector: function (centerX, centerY, radius, startDegree, endDegree, attributes, $group) {
+		
+		var isOutAngle = (endDegree - startDegree) > Math.PI
+	
+        return this._render('path', _.extend(
             {
                 d: 'M ' + centerX + ',' + centerY + ' ' +
                     'l ' + (radius * Math.cos(startDegree)) +
                         ',' + (radius * Math.sin(startDegree)) + ' ' +
-                    'A ' + radius + ',' + radius + ',0,0,1,' +
+					'A ' + radius + ',' + radius + ',0,' + (isOutAngle ? '1' : '0') + ',1,' +
                        (centerX + radius * Math.cos(endDegree)) + ',' +
                        (centerY + radius * Math.sin(endDegree)) + ' z'
             },
             attributes || {}
-        ));
+		), $group);
     },
 
 
@@ -111,7 +116,7 @@ window.Graph.prototype = {
 
         return $(document.createElementNS(this.SVG_NS, "g"))
             .attr({
-                transform: 'translate(' + this.options.paddingX + ', ' + (this.options.height - this.options.paddingY) + ')'
+                transform: 'translate(0, ' + this.options.height + ')'
             })
             .appendTo(
                 $('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" ></svg>')
@@ -136,96 +141,276 @@ window.Graph.prototype = {
         this.$workspace = this._renderWorkspace();
     },
 
+	
+	/**
+	 * Опции построения графика 
+     * @param options {Object}
+     * @return {Object}
+	 */
+	_mergeGraphOptions: function (options) {
+        var ret = {
+            paddingLeft: options.paddingLeft || this.options.paddingLeft,
+            paddingTop:  options.paddingTop  || this.options.paddingTop
+        };
+
+        ret.graphWidth =  options.width  || (this.options.width - ret.paddingLeft*2);
+        ret.graphHeight = options.height || (this.options.height - ret.paddingTop*2);
+		return _.extend(
+            {},
+            options,
+            ret
+        );
+	},
+
 
     /**
-     Вывод графика в виде линии
-     @param {Array} values
-     @param {Object} [options]
+     * Получим максимальное значение на графике
+     * @param  values [{Object|Number}]
+     * @param [options] {Object}
+     * @return {Number}
      */
-    renderLine: function (values, options) {
+    _getMaxValue: function (values, options) {
 
-        var self = this;
-        options || (options = {});
-        var ret = {};
-
-        // Параетры вывода
-        var step = options.step || this.options.workspaceWidth / (values.length - 1);
-        var maxValue = options.maxValue || _.max(values);
-        var pointRadius = (options.pointDiameter || self.options.pointDiameter) / 2;
-
-        // Получим все точки кривой
-        var svgPointsArray = _.map(values, function (val, i) {
-            return (step * i) + ',' + (-1 * (val.value || val) * self.options.workspaceHeight / maxValue)
-        });
-
-        // Добавим по одной вначале и вконце для фона
-        svgPointsArray.unshift(_.first(svgPointsArray).replace(/,[0-9.]+/, '') + ',0');
-        svgPointsArray.push(_.last(svgPointsArray).replace(/,[0-9.]+/, '') + ',0');
-
-        // Выведем фон
-        ret.shape = this._render('polyline', $.extend({}, options || {}, {
-            points: svgPointsArray.join(' '),
-            'class': 'shape ' + (options['class'] || '')
-        }));
-
-        // Выведем кривую
-        ret.line = this._render('polyline', $.extend({}, options || {}, {
-            points: svgPointsArray.slice(1, svgPointsArray.length - 1).join(' ')
-        }));
-
-        // Выведем точки кривой
-        ret.points = _.map(values, function (val, i) {
-
-            var height = (val.value || val) * self.options.workspaceHeight / maxValue;
-            return self._render('circle', $.extend({}, val.options || {}, {
-                cx: step * i,
-                cy: -height,
-                r:  pointRadius
-            }));
-
-        });
-
-        return ret;
+        return options.maxValue || _.max(
+            _.map(values, function (val) {
+                return val.value || val;
+            })
+        );
     },
 
 
     /**
-     Вывод графика в виде диаграммы
-     @param {Array} values
-     @param {Object} [options]
+     * Шаг точек
+     * @param  values [{Object|Number}]
+     * @param [options] {Object} {
+     *    graphWidth:  200,
+     *    step:        10
+     * }
+     * @return {Number}
      */
-    renderDiagram: function (values, options) {
+    _getPointStep: function (values, options) {
+        return options.step || (options.graphWidth / (values.length - 1))
+    },
 
-        var self = this;
-        options || (options = {});
+
+    /**
+     * Получим все точки кривой
+     * @param  values [{Object|Number}]
+     * @param [options] {Object} {
+     *    graphHeight:  200,
+     *    maxValue:     10
+     * }
+     * @return [{DOMNode}}
+     */
+    _getGraphPoints: function (values, options) {
+
+        var step = this._getPointStep(values, options);
+        var maxValue = this._getMaxValue(values, options);
+
+        return _.map(values, function (val, i) {
+            return (step * i) + ',' + (-1 * (val.value || val) * options.graphHeight / maxValue)
+        });
+    },
+	
+
+    /**
+     Вывод графика в виде линии с залитой областью под ней
+     * @param  values [{Object|Number}]
+     * @param [options] {Object} {
+     *    paddingLeft:  0,   // px
+     *    paddingTop:   0,   // px
+     *    width:        400, // px
+     *    height:       200, // px
+     *    maxValue:     10,
+     *    step:         10,  // px
+     *    'class':      ''
+     * }
+     * @return [{DOMNode}}
+     */
+    renderShape: function (values, options) {
+
+        // Параметры вывода
+		var graphOptions = this._mergeGraphOptions(options || {});
+		
+        // Получим все точки кривой
+        var svgPointsArray = this._getGraphPoints(values, graphOptions);
+
+        // Добавим по одной вначале и вконце для фона
+        svgPointsArray.unshift(_.first(svgPointsArray).replace(/,[0-9.-]+/, '') + ',0');
+        svgPointsArray.push(_.last(svgPointsArray).replace(/,[0-9.-]+/, '') + ',0');
+
+        // Выведем фон
+		return this._render('polyline', _.extend(graphOptions, {
+			points:  svgPointsArray.join(' '),
+			'class': 'shape ' + (graphOptions['class'] || '')
+		}));
+    },
+
+
+    /**
+     Вывод графика в виде линии
+     * @param  values [{Object|Number}]
+     * @param [options] {Object} {
+     *    paddingLeft:  0,   // px
+     *    paddingTop:   0,   // px
+     *    width:        400, // px
+     *    height:       200, // px
+     *    maxValue:     10,
+     *    step:         10,  // px
+     *    'class':      ''
+     * }
+     * @return [{DOMNode}}
+     */
+    renderLine: function (values, options) {
 
         // Параетры вывода
-        var step = options.step || this.options.diagramStep;
-        var rectWidth = options.rectWidth || Math.round((this.options.workspaceWidth / values.length) - step);
-        var maxValue = options.maxValue || _.max(values);
+		var graphOptions = this._mergeGraphOptions(options || {});
+		
+        // Получим все точки кривой
+        var svgPointsArray = this._getGraphPoints(values, graphOptions);
 
-        // Выведем каждый элемент диаграммы
+        // Выведем кривую
+        return this._render('polyline', _.extend(graphOptions, {
+            points: svgPointsArray.join(' ')
+        }));
+    },
+
+
+    /**
+     Вывод графика в виде точек
+     * @param  values [{Object|Number}]
+     * @param [options] {Object} {
+     *    paddingLeft:  0,   // px
+     *    paddingTop:   0,   // px
+     *    width:        400, // px
+     *    height:       200, // px
+     *    maxValue:     10,
+     *    step:         10,  // px
+     *    pointDiameter: 20, // px
+     *    'class':      ''
+     * }
+     * @return [{DOMNode}}
+     */
+    renderPoints: function (values, options) {
+
+        var self = this;
+
+        // Параетры вывода
+        var graphOptions = this._mergeGraphOptions(options || {});
+        var pointRadius = (graphOptions.pointDiameter || this.options.pointDiameter) / 2;
+        var maxValue = this._getMaxValue(values, graphOptions);
+        var step = this._getPointStep(values, graphOptions);
+
+        // Выведем точки кривой
         return _.map(values, function (val, i) {
 
-            var height = Math.round((val.value || val) * self.options.workspaceHeight / maxValue);
+            var height = (val.value || val) * graphOptions.graphHeight / maxValue;
+            return self._render('circle', _.extend(
+                {},
+				typeof val === 'object' ? val : {},
+				{
+					cx: step * i,
+					cy: -height,
+					r:  pointRadius,
+					value: val.value || val
+				}
+			));
 
-            // Выведем элемент диаграммы
-            return self._render('rect', $.extend({}, val.options || {}, {
-                x: Math.round((step + rectWidth) * i),
-                y:      -height,
-                width:  rectWidth,
-                height: height
-            }));
+        });
+    },
+	
+	
+	/**
+	 * Подсчитывает место, занимаемое отступами
+     * @return {Number}
+	 */
+	_getStepsTotal: function (values, options) {
+		
+		var i = 0;
+		return _.reduce(values, function (total, val) {
+			return total += options.step(val, i++);
+		}, 0);
+	},
+
+
+    /**
+     * Вывод графика в виде диаграммы
+     * @param  values [{Object|Number}]
+     * @param [options] {Object} {
+     *    paddingLeft:  0,    // px
+     *    paddingTop:   0,    // px
+     *    width:        400,  // px
+     *    height:       200,  // px
+     *    maxValue:     10,
+     *    rectWidth:    20,   // px
+     *    'class':      ''
+     * }
+     * @return [{DOMNode}}
+     */
+    renderRectDiagram: function (values, options) {
+
+        var self = this;
+
+        // Параметры вывода
+        var graphOptions = this._mergeGraphOptions(options || {});
+        var step = graphOptions.step || this.options.rectStep;
+        var rectWidth = graphOptions.rectWidth ||
+                        Math.round(
+                            (graphOptions.graphWidth / values.length) - (
+                                typeof step === 'function' ?
+                                this._getStepsTotal(values, graphOptions) / values.length :
+                                step
+                                )
+                        );
+        var maxValue = this._getMaxValue(values, graphOptions);
+
+        // крайняя правая точка предудущего столбца
+        var previousLastX = graphOptions.paddingLeft;
+
+		// Выводим группу
+		var $group = this._render('g', {
+			'class': this.options.rectDiagramClass + ' ' + (graphOptions['class'] || '')
+		});
+
+        // Выведем каждый столбец диаграммы
+        return _.map(values, function (val, i) {
+
+			// вычислим отсутп, ширину, высоту и позиции
+			var currentStep = typeof step === 'function' ?
+				step(val, i) :
+				Math.round(step);
+				
+			var currentWidth = typeof rectWidth === 'function' ?
+				rectWidth(val, i, {step: currentStep}) :
+				Math.round(rectWidth);
+				
+			var height = Math.round(graphOptions.paddingTop + (val.value || val) * graphOptions.graphHeight / maxValue);
+			var currentX = previousLastX;
+			previousLastX = currentX + currentStep + currentWidth;
+			
+            return self._render('rect', _.extend(
+                {},
+				typeof val === 'object' ? val : {},
+				{
+					x: 		currentX,
+					y:      -height,
+					width:  currentWidth,
+					height: height,
+					value:  val.value || val,
+					'class': self.options.rectClass + ' ' + (val['class'] || '')
+				}
+			), $group);
 
         });
     },
 
     /**
      * Вывод фильтра
+	 * @param $container
      * @private
      */
-    _renderGradient: function () {
-        var size = _.min([this.options.workspaceWidth, this.options.workspaceHeight]);
+    _renderGradient: function ($container) {
+        var size = _.min([this.options.width, this.options.height]);
 
         // FILTER
         var $filter = this._render("filter", {
@@ -249,47 +434,60 @@ window.Graph.prototype = {
             in2:      'offset-blur'
         }, $filter);
 
-        this.$workspace.attr({
+		($container || this.$workspace).attr({
             filter: 'url(#shadow)'
         });
     },
 
     /**
-     Вывод графика в виде круговой диаграммы
-     @param {Array} values
-     @param {Object} [options]
+     * Вывод графика в виде круговой диаграммы
+     * @param  values [{Object|Number}]
+     * @param [options] {Object} {
+     *    width:        200,  // px
+     *    height:       200,  // px
+     *    maxValue:     10,
+     *    valuesTotal:  100,
+     *    'class':      ''
+     * }
+     * @return [{DOMNode}}
      */
     renderCircleDiagram: function (values, options) {
 
         var self = this;
-        options || (options = {});
 
-        // Параетры вывода
-        var valuesTotal = options.valuesTotal || _.reduce(values, function (total, val) {
+        // Параметры вывода
+        var graphOptions = this._mergeGraphOptions(options || {});
+        // сумма всех значений ( = 2*PI)
+        var valuesTotal = graphOptions.valuesTotal || _.reduce(values, function (total, val) {
             return total + (val.value || val);
         }, 0);
-        var radius = _.min([self.options.workspaceHeight, self.options.workspaceWidth]) / 2;
+        var radius = _.min([graphOptions.graphHeight, graphOptions.graphWidth]) / 2;
         var centerX = radius;
         var centerY = -radius;
         var endDegree = 0;
 
+        // Выводим группу
+        var $group = this._render('g', {
+            'class': this.options.circleDiagramClass + (graphOptions['class'] || '')
+        });
         // Эффект
-        this._renderGradient();
+        this._renderGradient($group);
 
         // Выведем каждый элемент диаграммы
         return _.map(values, function (val, i) {
-            var elementOptions = $.extend(
+            var elementOptions = _.extend(
                 {},
-                val.options || {},
+				typeof val === 'object' ? val : {},
                 {
-                    'class': 'sector n' + i + (val.options && val.options['class'] ? ' ' + val.options['class'] : '')
+					'class': self.options.sectorClass + ' n' + i + (val['class'] || ''),
+					value: val.value || val
                 }
             );
             var startDegree = endDegree;
             endDegree = startDegree + (val.value || val) * 2 * Math.PI / valuesTotal;
 
             // Выведем сектор
-            return self._renderSector(centerX, centerY, radius, startDegree, endDegree, elementOptions)
+			return self._renderSector(centerX, centerY, radius, startDegree, endDegree, elementOptions, $group)
         });
     }
 };
