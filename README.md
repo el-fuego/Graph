@@ -35,7 +35,9 @@ var myGraph = new Graph ({
 myGraph.renderShape([2, 5, 7, 3, 5]);
 myGraph.renderLine([2, 5, 7, 3, 5]);
 myGraph.renderPoints([2, 5, 7, 3, 5]);
+</pre>
 
+<pre>
 // Столбцовая диаграмма
 new Graph ({
       el:    'body',
