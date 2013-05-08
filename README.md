@@ -29,9 +29,12 @@ var svgSectors = myGraph.renderCircleDiagram([2, 5, 7, 3, 5]);
 
 <pre>
 // Линейный график
-new Graph ({
+var myGraph = new Graph ({
       el:    'body',
-}).renderLine([2, 5, 7, 3, 5]);
+});
+myGraph.renderShape([2, 5, 7, 3, 5]);
+myGraph.renderLine([2, 5, 7, 3, 5]);
+myGraph.renderPoints([2, 5, 7, 3, 5]);
 
 // Столбцовая диаграмма
 new Graph ({
