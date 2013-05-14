@@ -40,20 +40,28 @@ window.Graph.prototype = {
         height:        140,
 
         // Отступы
-        paddingLeft:   10,
-        paddingTop:    10,
+        paddingLeft:   10.5,
+        paddingTop:    10.5,
 
         // Размер точки на линейном графике
         pointDiameter: 8,
 
         // Расстояние между столбцами
         rectStep:   5,
+
+        // Количество линий в сетке
+        greedLinesCount:   5,
 		
 		// классы
 		rectDiagramClass: 	'rect-diagram',
 		circleDiagramClass: 'circle-diagram',
+        verticalGreedClass: 'vertical-greed',
 		rectClass: 			'rect',
-		sectorClass: 		'sector'
+		sectorClass: 		'sector',
+        shapeClass: 		'shape',
+        lineClass: 		    'line',
+        pointClass: 		'point',
+        greedLineClass: 	'greed-line'
     },
 
 
@@ -208,7 +216,7 @@ window.Graph.prototype = {
         var maxValue = this._getMaxValue(values, options);
 
         return _.map(values, function (val, i) {
-            return (step * i) + ',' + (-1 * (val.value || val) * options.graphHeight / maxValue)
+            return (options.paddingLeft + step * i) + ',' + (-options.paddingTop -1 * (val.value || val) * options.graphHeight / maxValue)
         });
     },
 	
@@ -236,13 +244,13 @@ window.Graph.prototype = {
         var svgPointsArray = this._getGraphPoints(values, graphOptions);
 
         // Добавим по одной вначале и вконце для фона
-        svgPointsArray.unshift(_.first(svgPointsArray).replace(/,[0-9.-]+/, '') + ',0');
-        svgPointsArray.push(_.last(svgPointsArray).replace(/,[0-9.-]+/, '') + ',0');
+        svgPointsArray.unshift(_.first(svgPointsArray).replace(/,[0-9.-]+/, '') + ',' + (-graphOptions.paddingTop));
+        svgPointsArray.push(_.last(svgPointsArray).replace(/,[0-9.-]+/, '') + ',' + (-graphOptions.paddingTop));
 
         // Выведем фон
 		return this._render('polyline', _.extend(graphOptions, {
 			points:  svgPointsArray.join(' '),
-			'class': 'shape ' + (graphOptions['class'] || '')
+			'class': this.options.shapeClass + ' ' + (graphOptions['class'] || '')
 		}));
     },
 
@@ -271,7 +279,8 @@ window.Graph.prototype = {
 
         // Выведем кривую
         return this._render('polyline', _.extend(graphOptions, {
-            points: svgPointsArray.join(' ')
+            points: svgPointsArray.join(' '),
+            'class': this.options.lineClass
         }));
     },
 
@@ -304,15 +313,16 @@ window.Graph.prototype = {
         // Выведем точки кривой
         return _.map(values, function (val, i) {
 
-            var height = (val.value || val) * graphOptions.graphHeight / maxValue;
+            var height = graphOptions.paddingTop + (val.value || val) * graphOptions.graphHeight / maxValue;
             return self._render('circle', _.extend(
                 {},
 				typeof val === 'object' ? val : {},
 				{
-					cx: step * i,
-					cy: -height,
-					r:  pointRadius,
-					value: val.value || val
+                    cx:      graphOptions.paddingLeft + step * i,
+                    cy:      -height,
+                    r:       pointRadius,
+                    value:   val.value || val,
+                    'class': self.options.pointClass
 				}
 			));
 
@@ -384,7 +394,7 @@ window.Graph.prototype = {
 				rectWidth(val, i, {step: currentStep}) :
 				Math.round(rectWidth);
 				
-			var height = Math.round(graphOptions.paddingTop + (val.value || val) * graphOptions.graphHeight / maxValue);
+			var height = Math.round((val.value || val) * graphOptions.graphHeight / maxValue);
 			var currentX = previousLastX;
 			previousLastX = currentX + currentStep + currentWidth;
 			
@@ -393,7 +403,7 @@ window.Graph.prototype = {
 				typeof val === 'object' ? val : {},
 				{
 					x: 		currentX,
-					y:      -height,
+					y:      -graphOptions.paddingTop - height,
 					width:  currentWidth,
 					height: height,
 					value:  val.value || val,
@@ -402,6 +412,86 @@ window.Graph.prototype = {
 			), $group);
 
         });
+    },
+
+
+    /**
+     * отступ для сетки
+     * @return {Number}
+     */
+    _getGreedStep: function (maxValue, options) {
+
+        if (options.step) {
+            return options.step;
+        }
+        if (options.valueStep) {
+            return options.valueStep * options.graphHeight / maxValue;
+        }
+
+        // 2030 => 1000
+        // 9080 => 10000
+        var valueExponent = 1;
+        var remainder = maxValue / options.count;
+        while(Math.round(remainder / 10) > 0) {
+            remainder = remainder / 10;
+            valueExponent = valueExponent * 10;
+        }
+
+        var valueStep = Math.floor(maxValue / (options.count * 0.1 * valueExponent)) * 0.1 * valueExponent;
+
+        return Math.floor(valueStep * options.graphHeight / maxValue);
+    },
+
+
+    /**
+     * Вывод сетки
+     * @param  values [{Object|Number}]
+     * @param [options] {Object} {
+     *    paddingLeft:  0,    // px
+     *    paddingTop:   0,    // px
+     *    width:        400,  // px
+     *    height:       200,  // px
+     *    [maxValue]:   10,
+     *    [step]:       100,
+     *    count:        20,
+     *    'class':      ''
+     * }
+     * @return [{DOMNode}}
+     */
+    renderVerticalGreed: function (values, options) {
+
+        // Параметры вывода
+        var graphOptions = this._mergeGraphOptions(options || {});
+        if (!graphOptions.count) {
+            graphOptions.count = this.options.greedLinesCount;
+        }
+        var maxValue = this._getMaxValue(values, graphOptions);
+        var step = this._getGreedStep(maxValue, graphOptions);
+
+		// Выводим группу
+		var $group = this._render('g', {
+			'class': this.options.verticalGreedClass + ' ' + (graphOptions['class'] || '')
+		});
+
+        // Выведем каждую линию
+        var lines = [];
+        var i = graphOptions.count;
+        while (i--){
+            var position = -graphOptions.paddingTop - i * step;
+
+            lines.push(this._render('line', _.extend(
+                {},
+                {
+                    x1: graphOptions.paddingLeft,
+                    y1: position,
+                    x2: graphOptions.paddingLeft + graphOptions.graphWidth,
+                    y2: position,
+                    'class': this.options.greedLineClass
+                }
+            ), $group));
+        }
+
+        return lines;
     },
 
     /**

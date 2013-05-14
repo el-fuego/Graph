@@ -28,28 +28,45 @@
 
 		// Строим график
 		var myGraph = new Graph ({
-			el: '#graph-container'
+			el: '#graph-container',
+            width:  500,
+            height: 200
 		});
         var values = [{value: 1, 'class': 'first'}, 5, 6, 3, 5, 9, 7, 8, 2];
+        myGraph.renderVerticalGreed(values);
         myGraph.renderShape(values);
         myGraph.renderLine(values);
         myGraph.renderPoints(values);
 
 
 		// Строим диаграмму
-		(new Graph ({
+        var rectGraph = new Graph ({
 			el: '#graph-container',
             width:  500,
             height: 200
-		})).renderRectDiagram([1, 5, 6, 3, {value: 5, 'id': 'wow'}, 9, 7, {value: 2, 'class': 'last'}], {
-            step: function (val, i) {
-                return !(i % 2) ? 1 : 20;
-            },
-			width:       480,
-			height:      180,
-			paddingLeft: 10,
-			paddingTop:  10
 		});
+        var rectGraphValues = [1000, 5000, 6000, 3000, {value: 5000, 'id': 'wow'}, 9000, 7000, {value: 2000, 'class': 'last'}];
+        rectGraph.renderVerticalGreed(rectGraphValues, {
+            width:       499,
+            height:      180,
+            paddingLeft: 0.5, // для корректного отображения нечетных значений stroke-width
+            paddingTop:  9.5,
+            count:       5
+        });
+
+        rectGraph.renderRectDiagram(rectGraphValues, {
+            width:       480.5,
+            height:      180,
+            paddingLeft: 9.5, // для корректного отображения нечетных значений stroke-width
+            paddingTop:  9.5,
+            step: function (val, i) {
+                if (i === rectGraphValues.length -1) {
+                   return 0;
+                }
+                return !(i % 2) ? 1 : 20;
+            }
+        });
+
 	})
 	</script>
 </body>
