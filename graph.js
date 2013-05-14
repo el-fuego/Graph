@@ -244,8 +244,16 @@ window.Graph.prototype = {
         var svgPointsArray = this._getGraphPoints(values, graphOptions);
 
         // Добавим по одной вначале и вконце для фона
-        svgPointsArray.unshift(_.first(svgPointsArray).replace(/,[0-9.-]+/, '') + ',' + (-graphOptions.paddingTop));
-        svgPointsArray.push(_.last(svgPointsArray).replace(/,[0-9.-]+/, '') + ',' + (-graphOptions.paddingTop));
+        svgPointsArray.unshift(
+            _.first(svgPointsArray).replace(/,[0-9.-]+/, '') +
+            ',' +
+            (-graphOptions.paddingTop)
+        );
+        svgPointsArray.push(
+            _.last(svgPointsArray).replace(/,[0-9.-]+/, '') +
+            ',' +
+            (-graphOptions.paddingTop)
+        );
 
         // Выведем фон
 		return this._render('polyline', _.extend(graphOptions, {

@@ -6,7 +6,7 @@ Graph
 JavaScript + SVG + CSS<br />
 Libs: jQuery, Lodash/Underscore
 
-* 9kb unzipped JS + 1kb CSS
+* 6kb minified
 * Поддержка http://caniuse.com/#search=svg
 * Использование CSS для определения стилей
 * Установка дополнительных аттрибутов к DOM-объектам
@@ -29,19 +29,21 @@ var svgSectors = myGraph.renderCircleDiagram([2, 5, 7, 3, 5]);
 
 <pre>
 // Линейный график
-var myGraph = new Graph ({
+var lineGraph = new Graph ({
       el:    'body',
 });
-myGraph.renderShape([2, 5, 7, 3, 5]);
-myGraph.renderLine([2, 5, 7, 3, 5]);
-myGraph.renderPoints([2, 5, 7, 3, 5]);
+lineGraph.renderShape([2, 5, 7, 3, 5]);
+lineGraph.renderLine([2, 5, 7, 3, 5]);
+lineGraph.renderPoints([2, 5, 7, 3, 5]);
 </pre>
 
 <pre>
 // Столбцовая диаграмма
-new Graph ({
+var rectGraph = new Graph ({
       el:    'body',
-}).renderDiagram([2, 5, 7, 3, 5]);
+});
+rectGraph.renderVerticalGreed([2, 5, 7, 3, 5]);
+rectGraph.renderDiagram([2, 5, 7, 3, 5]);
 </pre>
 
 
