@@ -1,12 +1,12 @@
-Graph
-===========
-<b>Построение графиков в виде линий, столбцовых и круговых дигарамм.</b>
+<h1>Graph</h1> 
+<h3>Построение графиков в виде линий, столбцовых и круговых дигарамм.</h3>
+<a href="https://github.com/el-fuego/Graph/blob/master/graph.zip?raw=true"> [Скачать] </a>
 
 
 JavaScript + SVG + CSS<br />
 Libs: jQuery, Lodash/Underscore
 
-* 6kb minified
+* **6kb** minified
 * Поддержка http://caniuse.com/#search=svg
 * Использование CSS для определения стилей
 * Установка дополнительных аттрибутов к DOM-объектам
@@ -14,9 +14,10 @@ Libs: jQuery, Lodash/Underscore
 
 <img src="http://cs314117.vk.me/v314117782/231/mX4M_HC5jPY.jpg" />
 
-<b>Пример использования:</b>
+<hr/>
+<h3>Пример использования</h3>
+<h4>Круговая диаграмма:</h4>
 <pre>
-// Круговая диаграмма
 var myGraph = new Graph ({
       el:    'body',
       width:  300,
@@ -26,9 +27,8 @@ var myGraph = new Graph ({
 var svgSectors = myGraph.renderCircleDiagram([2, 5, 7, 3, 5]);
 </pre>
 
-
+<h4>Линейный график:</h4>
 <pre>
-// Линейный график
 var lineGraph = new Graph ({
       el:    'body',
 });
@@ -37,8 +37,8 @@ lineGraph.renderLine([2, 5, 7, 3, 5]);
 lineGraph.renderPoints([2, 5, 7, 3, 5]);
 </pre>
 
+<h4>Столбцовая диаграмма:</h4>
 <pre>
-// Столбцовая диаграмма
 var rectGraph = new Graph ({
       el:    'body',
 });
