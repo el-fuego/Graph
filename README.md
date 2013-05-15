@@ -1,16 +1,15 @@
-<h1>Graph JS + SVG + CSS</h1> 
+<h1>Graph JS + SVG</h1> 
 <h3>Линейные, столбцовые графики и круговые дигараммы.</h3>
-**Библиотека позволяет построить график в виде линий, столбцовой и круговой дигарамм.**
+**Библиотека позволяет построить график в виде линий, столбцовой и круговой дигарамм на JavaScript.**
 
 <a href="https://github.com/el-fuego/Graph/blob/master/graph.zip?raw=true"> [Скачать] </a>
 
-Libs: jQuery, Lodash/Underscore
-
 * **6kb** minified
 * Поддержка http://caniuse.com/#search=svg
-* Использование CSS для определения стилей
+* Использование **CSS** для определения стилей
 * Установка дополнительных аттрибутов к DOM-объектам
 * Возможность установки событий на элементы графиков
+* Требует: jQuery, Lodash/Underscore
 
 <img src="http://s3.uploads.ru/a2dov.png" />
 
