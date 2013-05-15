@@ -12,7 +12,7 @@ Libs: jQuery, Lodash/Underscore
 * Установка дополнительных аттрибутов к DOM-объектам
 * Возможность установки событий на элементы графиков
 
-<img src="http://s3.uploads.ru/KdWVH.png" />
+<img src="http://s3.uploads.ru/a2dov.png" />
 
 <hr/>
 <h3>Пример использования</h3>
