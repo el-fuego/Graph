@@ -12,7 +12,7 @@ Libs: jQuery, Lodash/Underscore
 * Установка дополнительных аттрибутов к DOM-объектам
 * Возможность установки событий на элементы графиков
 
-<img src="http://cs314117.vk.me/v314117782/231/mX4M_HC5jPY.jpg" />
+<img src="http://s3.uploads.ru/KdWVH.png" />
 
 <hr/>
 <h3>Пример использования</h3>
@@ -35,6 +35,7 @@ var lineGraph = new Graph ({
 lineGraph.renderShape([2, 5, 7, 3, 5]);
 lineGraph.renderLine([2, 5, 7, 3, 5]);
 lineGraph.renderPoints([2, 5, 7, 3, 5]);
+lineGraph.renderPointsValues([2, 5, 7, 3, 5]);
 </pre>
 
 <h4>Столбцовая диаграмма:</h4>
@@ -44,6 +45,7 @@ var rectGraph = new Graph ({
 });
 rectGraph.renderVerticalGreed([2, 5, 7, 3, 5]);
 rectGraph.renderDiagram([2, 5, 7, 3, 5]);
+rectGraph.renderRectsValues([2, 5, 7, 3, 5]);
 </pre>
 
 

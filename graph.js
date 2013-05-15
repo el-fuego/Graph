@@ -40,11 +40,14 @@ window.Graph.prototype = {
         height:        140,
 
         // Отступы
-        paddingLeft:   10.5,
-        paddingTop:    10.5,
+        paddingLeft:   20.5,
+        paddingTop:    20.5,
 
         // Размер точки на линейном графике
         pointDiameter: 8,
+
+        // Смещение значения по y
+        valueOffsetY: 8,
 
         // Расстояние между столбцами
         rectStep:   5,
@@ -61,6 +64,7 @@ window.Graph.prototype = {
         shapeClass: 		'shape',
         lineClass: 		    'line',
         pointClass: 		'point',
+        valueClass: 		'value',
         greedLineClass: 	'greed-line'
     },
 
@@ -157,8 +161,8 @@ window.Graph.prototype = {
 	 */
 	_mergeGraphOptions: function (options) {
         var ret = {
-            paddingLeft: options.paddingLeft || this.options.paddingLeft,
-            paddingTop:  options.paddingTop  || this.options.paddingTop
+            paddingLeft: options.paddingLeft != null ? options.paddingLeft : this.options.paddingLeft,
+            paddingTop:  options.paddingTop  != null ? options.paddingTop  : this.options.paddingTop
         };
 
         ret.graphWidth =  options.width  || (this.options.width - ret.paddingLeft*2);
@@ -336,6 +340,71 @@ window.Graph.prototype = {
 
         });
     },
+
+
+    /**
+     * Укороченое значение
+     * 1 000 000 => 1m
+     * 1 000 => 1k
+     * @param value {Float}
+     * @returns {String}
+     * @private
+     */
+    _getValueShortText: function (value) {
+        if (Math.abs(value / 1000000) >= 1) {
+            return (Math.round(value / 100000) / 10) + 'm';
+        }
+        if (Math.abs(value / 1000) >= 1) {
+            return (Math.round(value / 100) / 10) + 'k';
+        }
+        return (Math.round(value * 10) / 10);
+    },
+
+
+    /**
+     * Вывод значений над точками
+     * @param  values [{Object|Number}]
+     * @param [options] {Object} {
+     *    paddingLeft:  0,   // px
+     *    paddingTop:   0,   // px
+     *    width:        400, // px
+     *    height:       200, // px
+     *    maxValue:     10,
+     *    step:         10,  // px
+     *    pointDiameter: 20, // px
+     *    'class':      ''
+     * }
+     * @return [{DOMNode}}
+     */
+    renderPointsValues: function (values, options) {
+
+        var self = this;
+
+        // Параетры вывода
+        var graphOptions = this._mergeGraphOptions(options || {});
+        var maxValue = this._getMaxValue(values, graphOptions);
+        var step = this._getPointStep(values, graphOptions);
+
+        return _.map(values, function (val, i) {
+
+            var position = graphOptions.paddingTop +
+                           (graphOptions.pointDiameter || self.options.valueOffsetY) +
+                           (val.value || val) * graphOptions.graphHeight / maxValue;
+            return self._render(
+                'text',
+                _.extend(
+                    {},
+                    typeof val === 'object' ? val : {},
+                    {
+                        x:      graphOptions.paddingLeft + step * i,
+                        y:      -position,
+                        'class': self.options.valueClass
+                    }
+                )
+            ).append(self._getValueShortText(val.value || val));
+
+        });
+    },
 	
 	
 	/**
@@ -418,6 +487,75 @@ window.Graph.prototype = {
 					'class': self.options.rectClass + ' ' + (val['class'] || '')
 				}
 			), $group);
+
+        });
+    },
+
+
+    /**
+     * Вывод графика в виде диаграммы
+     * @param  values [{Object|Number}]
+     * @param [options] {Object} {
+     *    paddingLeft:  0,    // px
+     *    paddingTop:   0,    // px
+     *    width:        400,  // px
+     *    height:       200,  // px
+     *    maxValue:     10,
+     *    rectWidth:    20,   // px
+     *    'class':      ''
+     * }
+     * @return [{DOMNode}}
+     */
+    renderRectsValues: function (values, options) {
+
+        var self = this;
+
+        // Параметры вывода
+        var graphOptions = this._mergeGraphOptions(options || {});
+        var step = graphOptions.step || this.options.rectStep;
+        var rectWidth = graphOptions.rectWidth ||
+                        Math.round(
+                            (graphOptions.graphWidth / values.length) - (
+                                typeof step === 'function' ?
+                                this._getStepsTotal(values, graphOptions) / values.length :
+                                step
+                                )
+                        );
+        var maxValue = this._getMaxValue(values, graphOptions);
+
+        // крайняя правая точка предудущего столбца
+        var previousLastX = graphOptions.paddingLeft;
+
+		// Выводим группу
+		var $group = this._render('g', {
+			'class': this.options.rectDiagramClass + ' ' + (graphOptions['class'] || '')
+		});
+
+        // Выведем каждый столбец диаграммы
+        return _.map(values, function (val, i) {
+
+			// вычислим отсутп, ширину, высоту и позиции
+			var currentStep = typeof step === 'function' ?
+				step(val, i) :
+				Math.round(step);
+
+			var currentWidth = typeof rectWidth === 'function' ?
+				rectWidth(val, i, {step: currentStep}) :
+				Math.round(rectWidth);
+
+			var height = Math.round((val.value || val) * graphOptions.graphHeight / maxValue);
+			var currentX = previousLastX;
+			previousLastX = currentX + currentStep + currentWidth;
+
+            return self._render('text', _.extend(
+                {},
+				typeof val === 'object' ? val : {},
+				{
+					x: 		currentX + currentWidth/2,
+					y:      -graphOptions.paddingTop - height - self.options.valueOffsetY,
+					'class': self.options.valueClass + ' ' + (val['class'] || '')
+				}
+            ), $group).append(self._getValueShortText(val.value || val));
 
         });
     },

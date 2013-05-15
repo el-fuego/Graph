@@ -33,10 +33,13 @@
             height: 200
 		});
         var values = [{value: 1, 'class': 'first'}, 5, 6, 3, 5, 9, 7, 8, 2];
-        myGraph.renderVerticalGreed(values);
+        myGraph.renderVerticalGreed(values, {
+            paddingLeft: 0
+        });
         myGraph.renderShape(values);
         myGraph.renderLine(values);
         myGraph.renderPoints(values);
+        myGraph.renderPointsValues(values);
 
 
 		// Строим диаграмму
@@ -45,27 +48,26 @@
             width:  500,
             height: 200
 		});
-        var rectGraphValues = [1000, 5000, 6000, 3000, {value: 5000, 'id': 'wow'}, 9000, 7000, {value: 2000, 'class': 'last'}];
-        rectGraph.renderVerticalGreed(rectGraphValues, {
-            width:       499,
-            height:      180,
-            paddingLeft: 0.5, // для корректного отображения нечетных значений stroke-width
-            paddingTop:  9.5,
-            count:       5
-        });
-
-        rectGraph.renderRectDiagram(rectGraphValues, {
-            width:       480.5,
-            height:      180,
-            paddingLeft: 9.5, // для корректного отображения нечетных значений stroke-width
-            paddingTop:  9.5,
-            step: function (val, i) {
-                if (i === rectGraphValues.length -1) {
-                   return 0;
+        var rectGraphValues = [1200, 5300, 920, 3000, {value: 4000, 'id': 'wow'}, 3900, 1500, {value: 2000, 'class': 'last'}];
+        var rectGraphOptions = {
+            width:       459,
+            height:      159,
+            paddingLeft: 20.5, // для корректного отображения нечетных значений stroke-width
+            paddingTop:  20.5
+        };
+        rectGraph.renderVerticalGreed(rectGraphValues, _.extend(
+                {},
+                rectGraphOptions,
+                {
+                    width:       499,
+                    paddingLeft: 0.5,
+                    count:       5,
+                    step:        null
                 }
-                return !(i % 2) ? 1 : 20;
-            }
-        });
+            )
+        );
+        rectGraph.renderRectDiagram(rectGraphValues, rectGraphOptions);
+        rectGraph.renderRectsValues(rectGraphValues, rectGraphOptions);
 
 	})
 	</script>

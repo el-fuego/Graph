@@ -45,6 +45,14 @@ svg {
 	stroke-width: 6;
 }
 
+.value {
+	fill:         #555;
+	font-size:    12px;
+	font-weight:  bold;
+	font-family:  Arial;
+	text-anchor:  middle;
+}
+
 .point:hover {
 	fill:   #C000A8;
 	stroke: #C000A8;
