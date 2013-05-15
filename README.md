@@ -4,8 +4,8 @@
 
 <a href="https://github.com/el-fuego/Graph/blob/master/graph.zip?raw=true"> [Скачать] </a>
 
-* **6kb** minified
-* Поддержка http://caniuse.com/#search=svg
+* Ничего лишнего, **6kb** minified
+* Поддержка IE http://caniuse.com/#search=svg
 * Использование **CSS** для определения стилей
 * Установка дополнительных аттрибутов к DOM-объектам
 * Возможность установки событий на элементы графиков
