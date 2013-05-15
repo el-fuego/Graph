@@ -1,9 +1,9 @@
-<h1>Graph</h1> 
-<h3>Построение графиков в виде линий, столбцовых и круговых дигарамм.</h3>
+<h1>Graph JS + SVG + CSS</h1> 
+<h3>Линейные, столбцовые графики и круговые дигараммы.</h3>
+**Библиотека позволяет построить график в виде линий, столбцовой и круговой дигарамм.**
+
 <a href="https://github.com/el-fuego/Graph/blob/master/graph.zip?raw=true"> [Скачать] </a>
 
-
-JavaScript + SVG + CSS<br />
 Libs: jQuery, Lodash/Underscore
 
 * **6kb** minified
