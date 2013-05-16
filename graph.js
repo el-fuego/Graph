@@ -104,7 +104,10 @@ window.Graph.prototype = {
      */
 	_renderSector: function (centerX, centerY, radius, startDegree, endDegree, attributes, $group) {
 		
-		var isOutAngle = (endDegree - startDegree) > Math.PI
+		var isOutAngle = (endDegree - startDegree) > Math.PI;
+        if (endDegree - startDegree >= Math.PI * 2) {
+            endDegree = startDegree - 0.00001 + Math.PI * 2;
+        }
 	
         return this._render('path', _.extend(
             {
@@ -176,16 +179,25 @@ window.Graph.prototype = {
 
 
     /**
+     * Возвращает числовое значение для графика
+     * @private
+     */
+    _getValue: function (val) {
+         return (typeof val === 'object' ? val.value || 0 : val || 0);
+    },
+
+
+    /**
      * Получим максимальное значение на графике
      * @param  values [{Object|Number}]
      * @param [options] {Object}
      * @return {Number}
      */
     _getMaxValue: function (values, options) {
-
+        var self = this;
         return options.maxValue || _.max(
             _.map(values, function (val) {
-                return val.value || val;
+                return self._getValue(val);
             })
         );
     },
@@ -216,11 +228,12 @@ window.Graph.prototype = {
      */
     _getGraphPoints: function (values, options) {
 
+        var self = this;
         var step = this._getPointStep(values, options);
         var maxValue = this._getMaxValue(values, options);
 
         return _.map(values, function (val, i) {
-            return (options.paddingLeft + step * i) + ',' + (-options.paddingTop -1 * (val.value || val) * options.graphHeight / maxValue)
+            return (options.paddingLeft + step * i) + ',' + (-options.paddingTop - self._getValue(val) * options.graphHeight / maxValue)
         });
     },
 	
@@ -325,7 +338,7 @@ window.Graph.prototype = {
         // Выведем точки кривой
         return _.map(values, function (val, i) {
 
-            var height = graphOptions.paddingTop + (val.value || val) * graphOptions.graphHeight / maxValue;
+            var height = graphOptions.paddingTop + (self._getValue(val)) * graphOptions.graphHeight / maxValue;
             return self._render('circle', _.extend(
                 {},
 				typeof val === 'object' ? val : {},
@@ -333,7 +346,7 @@ window.Graph.prototype = {
                     cx:      graphOptions.paddingLeft + step * i,
                     cy:      -height,
                     r:       pointRadius,
-                    value:   val.value || val,
+                    value:   self._getValue(val),
                     'class': self.options.pointClass
 				}
 			));
@@ -389,7 +402,7 @@ window.Graph.prototype = {
 
             var position = graphOptions.paddingTop +
                            (graphOptions.pointDiameter || self.options.valueOffsetY) +
-                           (val.value || val) * graphOptions.graphHeight / maxValue;
+                           (self._getValue(val)) * graphOptions.graphHeight / maxValue;
             return self._render(
                 'text',
                 _.extend(
@@ -401,7 +414,7 @@ window.Graph.prototype = {
                         'class': self.options.valueClass
                     }
                 )
-            ).append(self._getValueShortText(val.value || val));
+            ).append(self._getValueShortText(self._getValue(val)));
 
         });
     },
@@ -471,7 +484,7 @@ window.Graph.prototype = {
 				rectWidth(val, i, {step: currentStep}) :
 				Math.round(rectWidth);
 				
-			var height = Math.round((val.value || val) * graphOptions.graphHeight / maxValue);
+			var height = Math.round((self._getValue(val)) * graphOptions.graphHeight / maxValue);
 			var currentX = previousLastX;
 			previousLastX = currentX + currentStep + currentWidth;
 			
@@ -483,7 +496,7 @@ window.Graph.prototype = {
 					y:      -graphOptions.paddingTop - height,
 					width:  currentWidth,
 					height: height,
-					value:  val.value || val,
+					value:  self._getValue(val),
 					'class': self.options.rectClass + ' ' + (val['class'] || '')
 				}
 			), $group);
@@ -543,7 +556,7 @@ window.Graph.prototype = {
 				rectWidth(val, i, {step: currentStep}) :
 				Math.round(rectWidth);
 
-			var height = Math.round((val.value || val) * graphOptions.graphHeight / maxValue);
+			var height = Math.round((self._getValue(val)) * graphOptions.graphHeight / maxValue);
 			var currentX = previousLastX;
 			previousLastX = currentX + currentStep + currentWidth;
 
@@ -555,7 +568,7 @@ window.Graph.prototype = {
 					y:      -graphOptions.paddingTop - height - self.options.valueOffsetY,
 					'class': self.options.valueClass + ' ' + (val['class'] || '')
 				}
-            ), $group).append(self._getValueShortText(val.value || val));
+            ), $group).append(self._getValueShortText(self._getValue(val)));
 
         });
     },
@@ -695,7 +708,7 @@ window.Graph.prototype = {
         var graphOptions = this._mergeGraphOptions(options || {});
         // сумма всех значений ( = 2*PI)
         var valuesTotal = graphOptions.valuesTotal || _.reduce(values, function (total, val) {
-            return total + (val.value || val);
+            return total + (self._getValue(val));
         }, 0);
         var radius = _.min([graphOptions.graphHeight, graphOptions.graphWidth]) / 2;
         var centerX = radius;
@@ -716,11 +729,11 @@ window.Graph.prototype = {
 				typeof val === 'object' ? val : {},
                 {
 					'class': self.options.sectorClass + ' n' + i + (val['class'] || ''),
-					value: val.value || val
+					value: self._getValue(val)
                 }
             );
             var startDegree = endDegree;
-            endDegree = startDegree + (val.value || val) * 2 * Math.PI / valuesTotal;
+            endDegree = startDegree + (self._getValue(val)) * 2 * Math.PI / valuesTotal;
 
             // Выведем сектор
 			return self._renderSector(centerX, centerY, radius, startDegree, endDegree, elementOptions, $group)
