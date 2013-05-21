@@ -13,8 +13,8 @@ module.exports = function (grunt) {
                 compress: true,
                 report:   false
             },
-            js:      {
-                'src':  'graph.js',
+            js: {
+                'src':  'source/*.js',
                 'dest': 'graph.min.js'
             }
         },
@@ -28,8 +28,7 @@ module.exports = function (grunt) {
                 options: {
                     archive: 'graph.zip'
                 },
-                src:     [
-                    'graph.js',
+                src: [
                     'graph.min.js',
                     'graph.css',
                     'sample.html'
@@ -44,7 +43,8 @@ module.exports = function (grunt) {
          */
         watch: {
             files: [
-                '*.{js,html,css}'
+                'source/*.js',
+                '*.{html,css}'
             ],
             tasks: [
                 'uglify',

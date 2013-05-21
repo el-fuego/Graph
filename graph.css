@@ -1,50 +1,51 @@
 body {
-	background: #f5f5f5;
+    background: #f5f5f5;
 }
 
 svg {
-	margin:  18px auto;
-	clear:   both;
-	display: block;
+    margin:  18px auto;
+    clear:   both;
+    display: block;
 }
 
 .rect {
-	fill:         #005FB9;
-	cursor:       pointer;
-	stroke-width: 1;
-	stroke:       #fff;
+    fill:         #005FB9;
+    cursor:       pointer;
+    stroke-width: 1;
+    stroke:       #fff;
 }
 
 .rect:hover {
-	fill: #C000A8;
+    fill: #C000A8;
 }
 
 .greed-line {
-	fill:         none;
-	stroke:       #aaa;
-	stroke-width: 1;
+    fill:         none;
+    stroke:       #aaa;
+    stroke-width: 1;
 }
 
 .line {
-	fill:         none;
-	stroke:       #005FB9;
-	stroke-width: 3;
+    fill:         none;
+    stroke:       #005FB9;
+    stroke-width: 3;
 }
 
 .shape {
-	fill:           #f0f0f0;
-	fill-opacity:   0.8;
-	stroke:         #f0f0f0;
-	stroke-opacity: 0.8;
+    fill:           #f0f0f0;
+    fill-opacity:   0.8;
+    stroke:         #f0f0f0;
+    stroke-opacity: 0.8;
 }
 
 .point {
-	fill:         #005FB9;
-	stroke:       transparent;
-	cursor:       pointer;
-	stroke-width: 6;
+    fill:         #005FB9;
+    stroke:       transparent;
+    cursor:       pointer;
+    stroke-width: 6;
 }
 
+.rect-name,
 .value {
 	fill:         #555;
 	font-size:    12px;
@@ -52,74 +53,77 @@ svg {
 	font-family:  Arial;
 	text-anchor:  middle;
 }
+.rect-name {
+	dominant-baseline: text-before-edge;
+}
 
 .point:hover {
-	fill:   #C000A8;
-	stroke: #C000A8;
+    fill:   #C000A8;
+    stroke: #C000A8;
 }
 
 .sector {
-	fill:         #555;
-	stroke-width: 0.9;
-	stroke:       #fff;
+    fill:         #555;
+    stroke-width: 0.9;
+    stroke:       #fff;
 }
 
 .sector.n0 {
-	fill: #006CC2;
+    fill: #006CC2;
 }
 
 .sector.n1 {
-	fill: #FFA000;
+    fill: #FFA000;
 }
 
 .sector.n2 {
-	fill: #F53C1D;
+    fill: #F53C1D;
 }
 
 .sector.n3 {
-	fill: #00A200;
+    fill: #00A200;
 }
 
 .sector.n4 {
-	fill: #b100a3;
+    fill: #b100a3;
 }
 
 .sector.n5 {
-	fill: #00C19B;
+    fill: #00C19B;
 }
 
 .sector.n6 {
-	fill: #d30051;
+    fill: #d30051;
 }
 
 .sector.n7 {
-	fill: #bdd000;
+    fill: #bdd000;
 }
 
 .sector.n8 {
-	fill: #00B3C1;
+    fill: #00B3C1;
 }
 
 .sector.n9 {
-	fill: #5700C1;
+    fill: #5700C1;
 }
 
 .sector.n10 {
-	fill: #D68730;
+    fill: #D68730;
 }
 
 .sector.n11 {
-	fill: #D5C831;
+    fill: #D5C831;
 }
 
 .sector.n12 {
-	fill: #BD484B;
+    fill: #BD484B;
 }
 
 .sector.n13 {
-	fill: #45A2C0;
+    fill: #45A2C0;
 }
 
 .sector.n14 {
-	fill: #46BF62;
+    fill: #46BF62;
 }
