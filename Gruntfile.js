@@ -5,6 +5,14 @@ module.exports = function (grunt) {
      */
     grunt.initConfig({
 
+
+        /**
+         * Сборка JS
+         */
+        concat: {
+            'graph.js':  'source/*.js'
+        },
+
         /**
          * Минификация JS
          */
@@ -14,7 +22,7 @@ module.exports = function (grunt) {
                 report:   false
             },
             js: {
-                'src':  'source/*.js',
+                'src':  'graph.js',
                 'dest': 'graph.min.js'
             }
         },
@@ -47,6 +55,7 @@ module.exports = function (grunt) {
                 '*.{html,css}'
             ],
             tasks: [
+                'concat',
                 'uglify',
                 'compress'
             ],
@@ -59,6 +68,7 @@ module.exports = function (grunt) {
     /**
      * Используемые модули
      */
+    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-contrib-watch');
@@ -67,6 +77,6 @@ module.exports = function (grunt) {
      * Сборка JS-интерфейса
      */
     grunt.registerTask('default', [
-        'uglify', 'compress', 'watch'
+        'concat', 'uglify', 'compress', 'watch'
     ]);
 };
