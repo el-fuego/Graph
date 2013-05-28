@@ -53,9 +53,6 @@ svg {
 	font-family:  Arial;
 	text-anchor:  middle;
 }
-.rect-name {
-	dominant-baseline: text-before-edge;
-}
 
 .point:hover {
     fill:   #C000A8;

@@ -238,7 +238,11 @@ _.extend(window.Graph.prototype, {
                 graphOptions.fullText ?
                 self._getValue(val) :
                 self._getValueShortText(self._getValue(val)),
-                {x: x},
+                {
+                    x: x,
+                    y: -position,
+                    isBottomBaseLine: true
+                },
                 $text
             );
         });

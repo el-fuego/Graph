@@ -142,7 +142,6 @@ window.Graph.prototype = {
     },
 
 
-
     /**
      * Добавляет текст в <text> с учетом переносов строк
      * @param text
@@ -152,14 +151,19 @@ window.Graph.prototype = {
      */
     _appendTextNodes: function (str, options, $text) {
         var words = str.toString().split('\n');
-        $text.append(words.shift());
+        var dy = +$text.css('font-size').toString().replace(/[^0-9]/g, '');
+        var y = options.isBottomBaseLine ? options.y : options.y + dy;
+        this._render('tspan', {
+            x: options.x,
+            y: y
+        }, $text).append(words.shift());
         if (words.length) {
             var word;
-            var dy = +$text.css('font-size').toString().replace(/[^0-9]/g, '');
             while (word = words.shift()) {
+                y += options.isBottomBaseLine ? -dy : dy;
                 this._render('tspan', {
-                    x: 		options.x,
-                    dy:     dy
+                    x: options.x,
+                    y: y
                 }, $text).append(word);
             }
         }

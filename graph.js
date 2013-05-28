@@ -142,7 +142,6 @@ window.Graph.prototype = {
     },
 
 
-
     /**
      * Добавляет текст в <text> с учетом переносов строк
      * @param text
@@ -152,14 +151,19 @@ window.Graph.prototype = {
      */
     _appendTextNodes: function (str, options, $text) {
         var words = str.toString().split('\n');
-        $text.append(words.shift());
+        var dy = +$text.css('font-size').toString().replace(/[^0-9]/g, '');
+        var y = options.isBottomBaseLine ? options.y : options.y + dy;
+        this._render('tspan', {
+            x: options.x,
+            y: y
+        }, $text).append(words.shift());
         if (words.length) {
             var word;
-            var dy = +$text.css('font-size').toString().replace(/[^0-9]/g, '');
             while (word = words.shift()) {
+                y += options.isBottomBaseLine ? -dy : dy;
                 this._render('tspan', {
-                    x: 		options.x,
-                    dy:     dy
+                    x: options.x,
+                    y: y
                 }, $text).append(word);
             }
         }
@@ -758,7 +762,11 @@ _.extend(window.Graph.prototype, {
                 graphOptions.fullText ?
                 self._getValue(val) :
                 self._getValueShortText(self._getValue(val)),
-                {x: x},
+                {
+                    x: x,
+                    y: -position,
+                    isBottomBaseLine: true
+                },
                 $text
             );
         });
@@ -879,13 +887,21 @@ _.extend(window.Graph.prototype, {
      */
     _renderRectName: function (val, options, $container) {
         var x = options.x + options.width/2;
+        var y = options.y + this.options.valueOffsetY + options.height;
         var $textEl = this._render('text', {
-            x: 		x,
-            y:      options.y + this.options.valueOffsetY + options.height,
+            x: x,
+            y: y,
             'class': this.options.rectNameClass + ' ' + (val['class'] || '')
         }, $container);
 
-        this._appendTextNodes(val.name, {x: x}, $textEl);
+        this._appendTextNodes(
+            val.name,
+            {
+                x: x,
+                y: y
+            },
+            $textEl
+        );
 
         return $textEl;
     },
@@ -901,12 +917,13 @@ _.extend(window.Graph.prototype, {
      */
     _renderRectValue: function (val, options, graphOptions, $container) {
         var x = options.x + options.width/2;
+        var y = options.y - this.options.valueOffsetY;
         var $text =  this._render('text', _.extend(
             {},
             typeof val === 'object' ? val : {},
             {
                 x:       x,
-                y:       options.y - this.options.valueOffsetY,
+                y:       y,
                 'class': this.options.valueClass + ' ' + (val['class'] || '')
             }
         ), $container);
@@ -915,7 +932,11 @@ _.extend(window.Graph.prototype, {
             graphOptions.fullText ?
                 this._getValue(val) :
                 this._getValueShortText(this._getValue(val)),
-            {x: x},
+            {
+                x: x,
+                y: y,
+                isBottomBaseLine: true
+            },
             $text
         );
 
