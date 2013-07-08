@@ -212,7 +212,7 @@ _.extend(window.Graph.prototype, {
 
 
     /**
-     * Вывод графика в виде диаграммы
+     * Вывод значений столбцов
      * @param  values [{Object|Number}]
      * @param [options] {Object} {
      *    paddingLeft:  0,    // px

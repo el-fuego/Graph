@@ -1,37 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Построение графиков и диаграмм на JavaScript с использованием SVG</title>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	
-	<link rel="stylesheet" href="graph.css" />
-	
-	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-	<script type="text/javascript" src="https://raw.github.com/bestiejs/lodash/v0.9.1/lodash.min.js"></script>
-	<script type="text/javascript" src="graph.min.js"></script>
+    <title>Построение графиков и диаграмм на JavaScript с использованием SVG</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+    <link rel="stylesheet" href="graph.css" />
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
+    <script type="text/javascript" src="graph.js"></script>
 
 </head>
 <body>
 
-	<div id="graph-container"></div>
-	<script type="text/javascript">
-	
-	$(function(){
+    <div id="graph-container"></div>
+    <script type="text/javascript">
+
+    $(function(){
 
         // Строим круговую диаграмму
-        (new Graph ({
+        var circleGraphOptions = {
             el:    '#graph-container',
-            width:  300,
-            height: 300
-        })).renderCircleDiagram([2, 5, 7, 3, 5]);
+            width:  600,
+            height: 400
+        };
+        var circleGraph = new Graph (circleGraphOptions);
+
+        var circleGraphValues = [{value: 2, name: 'cats'}, {value: 5, name: 'dogs'}, {value: 7, name: 'fishes'}, {value: 0.5, name: 'lamas'}, {value: 2, name: 'elephants'}];
+        circleGraph.renderCircleDiagram(circleGraphValues, _.extend(
+                {},
+                circleGraphOptions,
+                {
+                    width: 300,
+                    height: 300
+                }
+            )
+        );
 
 
-		// Строим график
-		var myGraph = new Graph ({
-			el: '#graph-container',
+        // Строим график с линиями
+        var myGraph = new Graph ({
+            el: '#graph-container',
             width:  500,
             height: 200
-		});
+        });
         var values = [{value: 1, 'class': 'first'}, 5, 6, 3, 5, 9, 7, 8, 2];
         myGraph.renderVerticalGreed(values, {
             paddingLeft: 0
@@ -42,18 +54,18 @@
         myGraph.renderPointsValues(values);
 
 
-		// Строим диаграмму
+        // Строим столбцовую диаграмму
         var rectGraph = new Graph ({
-			el: '#graph-container',
+            el: '#graph-container',
             width:  500,
             height: 200
-		});
+        });
         var rectGraphValues = [1200, 5300, 920, 3000, {value: 4000, 'id': 'wow', name: 'stable'}, 3900, 1500, {value: 2000, 'class': 'last', name: 'last'}];
         var rectGraphOptions = {
             width:       459,
-            height:      159,
+            height:      139,
             paddingLeft: 20.5, // для корректного отображения нечетных значений stroke-width
-            paddingTop:  20.5,
+            paddingTop:  30.5,
             step:        18
         };
         rectGraph.renderVerticalGreed(rectGraphValues, _.extend(
@@ -70,7 +82,7 @@
         rectGraph.renderRectDiagram(rectGraphValues, rectGraphOptions);
         rectGraph.renderRectsValues(rectGraphValues, rectGraphOptions);
 
-	})
-	</script>
+    })
+    </script>
 </body>
 </html>

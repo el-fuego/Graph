@@ -55,6 +55,12 @@ window.Graph.prototype = {
         // Количество линий в сетке
         greedLinesCount:   5,
 
+        // Расстояние между точками в сноске
+        footnotePointsMargin:  20,
+
+        // Длинна сноски
+        footnoteLength:  200,
+
         // классы
         rectDiagramClass: 	'rect-diagram',
         circleDiagramClass: 'circle-diagram',
@@ -62,6 +68,8 @@ window.Graph.prototype = {
         rectClass: 			'rect',
         rectNameClass:  	'rect-name',
         sectorClass: 		'sector',
+        sectorNameClass:    'sector-name',
+        sectorFootnote:     'sector-footnote',
         shapeClass: 		'shape',
         lineClass: 		    'line',
         pointClass: 		'point',
@@ -156,10 +164,10 @@ window.Graph.prototype = {
         this._render('tspan', {
             x: options.x,
             y: y
-        }, $text).append(words.shift());
+        }, $text).append(options.isBottomBaseLine ? words.pop() : words.shift());
         if (words.length) {
             var word;
-            while (word = words.shift()) {
+            while (word = options.isBottomBaseLine ? words.pop() : words.shift()) {
                 y += options.isBottomBaseLine ? -dy : dy;
                 this._render('tspan', {
                     x: options.x,
@@ -226,10 +234,10 @@ window.Graph.prototype = {
      */
     _getValueShortText: function (value) {
         if (Math.abs(value / 1000000) >= 1) {
-            return (Math.round(value / 100000) / 10) + 'm';
+            return (Math.round(value / 100000) / 10) + '\nмлн.';
         }
         if (Math.abs(value / 1000) >= 1) {
-            return (Math.round(value / 100) / 10) + 'k';
+            return (Math.round(value / 100) / 10) + '\nтыс.';
         }
         return (Math.round(value * 10) / 10);
     }
@@ -252,34 +260,83 @@ _.extend(window.Graph.prototype, {
 
     /**
      Создание сектора круга
-     @param {String} centerX
-     @param {String} centerY
-     @param {String} radius
-     @param {String} startDegree
-     @param {String} endDegree
-     @param {Object} [attributes]
-     @param {Object} [$group]
+     * @param {Object} val
+     @param {String} options.x
+     @param {String} options.y
+     @param {String} options.radius
+     @param {String} options.startDegree
+     @param {String} options.endDegree
+     @param {Object} [$container]
      @private
      */
-    _renderSector: function (centerX, centerY, radius, startDegree, endDegree, attributes, $group) {
+    _renderSector: function (val, options, $container) {
 
-        var isOutAngle = (endDegree - startDegree) > Math.PI;
-        if (endDegree - startDegree >= Math.PI * 2) {
-            endDegree = startDegree - 0.00001 + Math.PI * 2;
+        var isOutAngle = (options.endDegree - options.startDegree) > Math.PI;
+        if (options.endDegree - options.startDegree >= Math.PI * 2) {
+            options.endDegree = options.startDegree - 0.00001 + Math.PI * 2;
         }
 
-        return this._render('path', _.extend(
-            {
-                d: 'M ' + centerX + ',' + centerY + ' ' +
-                    'l ' + (radius * Math.cos(startDegree)) +
-                        ',' + (radius * Math.sin(startDegree)) + ' ' +
-                    'A ' + radius + ',' + radius + ',0,' + (isOutAngle ? '1' : '0') + ',1,' +
-                       (centerX + radius * Math.cos(endDegree)) + ',' +
-                       (centerY + radius * Math.sin(endDegree)) + ' z'
-            },
-            attributes || {}
-        ), $group);
+        return this._render('path', {
+            d: 'M ' + options.x + ',' + options.y + ' ' +
+                'l ' + (options.radius * Math.cos(options.startDegree)) +
+                    ',' + (options.radius * Math.sin(options.startDegree)) + ' ' +
+                'A ' + options.radius + ',' + options.radius + ',0,' + (isOutAngle ? '1' : '0') + ',1,' +
+                   (options.x + options.radius * Math.cos(options.endDegree)) + ',' +
+                   (options.y + options.radius * Math.sin(options.endDegree)) + ' z',
+            'class': options['class']
+        }, $container);
     },
+
+
+    /**
+     * Получение параметров круговой диаграммы
+     * @return {Object}
+     */
+    _getCircleDiagramOptions: function (values, options) {
+
+        var self = this;
+        var graphOptions = this._mergeGraphOptions(options);
+
+        // сумма всех значений ( = 2*PI)
+        graphOptions.valuesTotal = graphOptions.valuesTotal || _.reduce(values, function (total, val) {
+            return total + (self._getValue(val));
+        }, 0);
+        graphOptions.radius = _.min([graphOptions.graphHeight, graphOptions.graphWidth]) / 2;
+        graphOptions.x = this.options.width / 2;
+        graphOptions.y = -this.options.height / 2;
+        graphOptions.startDegree = 0;
+        graphOptions.endDegree = 0;
+        graphOptions.footnotePointsMargin = options.footnotePointsMargin || this.options.footnotePointsMargin;
+
+        return graphOptions;
+    },
+
+
+    /**
+     * Получение параметров сектора круговой диаграммы
+     * @return {Object}
+     */
+    _getSectorOptions: function (val, index, graphOptions) {
+
+        var sectorOptions = {
+            'class':              this.options.sectorClass + ' n' + index + (val['class'] || ''),
+            value:                this._getValue(val),
+            name:                 val.name,
+            startDegree:          graphOptions.endDegree,
+            endDegree:            graphOptions.endDegree + (this._getValue(val)) * 2 * Math.PI / graphOptions.valuesTotal,
+            radius:               graphOptions.radius,
+            x:                    graphOptions.x,
+            y:                    graphOptions.y,
+            footnotePointsMargin: graphOptions.footnotePointsMargin,
+            footnoteLength:       graphOptions.footnoteLength
+        };
+
+        graphOptions.startDegree = sectorOptions.startDegree;
+        graphOptions.endDegree = sectorOptions.endDegree;
+
+        return sectorOptions;
+    },
+
 
     /**
      * Вывод графика в виде круговой диаграммы
@@ -298,40 +355,95 @@ _.extend(window.Graph.prototype, {
         var self = this;
 
         // Параметры вывода
-        var graphOptions = this._mergeGraphOptions(options || {});
-
-        // сумма всех значений ( = 2*PI)
-        var valuesTotal = graphOptions.valuesTotal || _.reduce(values, function (total, val) {
-            return total + (self._getValue(val));
-        }, 0);
-        var radius = _.min([graphOptions.graphHeight, graphOptions.graphWidth]) / 2;
-        var centerX = radius;
-        var centerY = -radius;
-        var endDegree = 0;
+        var graphOptions = this._getCircleDiagramOptions(values, options || {});
 
         // Выводим группу
         var $group = this._render('g', {
+            'class': this.options.circleDiagramClass + (graphOptions['class'] || '')
+        });
+        var $namesGroup = this._render('g', {
             'class': this.options.circleDiagramClass + (graphOptions['class'] || '')
         });
         // Эффект
         this._renderRadialGradient($group);
 
         // Выведем каждый элемент диаграммы
-        return _.map(values, function (val, i) {
-            var elementOptions = _.extend(
-                {},
-                typeof val === 'object' ? val : {},
-                {
-                    'class': self.options.sectorClass + ' n' + i + (val['class'] || ''),
-                    value: self._getValue(val)
-                }
-            );
-            var startDegree = endDegree;
-            endDegree = startDegree + (self._getValue(val)) * 2 * Math.PI / valuesTotal;
+        _.map(values, function (val, i) {
+
+            var sectorOptions = this._getSectorOptions(val, i, graphOptions);
 
             // Выведем сектор
-            return self._renderSector(centerX, centerY, radius, startDegree, endDegree, elementOptions, $group)
-        });
+            self._renderSector(val, sectorOptions, $group);
+
+            if (sectorOptions.name != null) {
+                self._renderSectorName(val, sectorOptions, $namesGroup);
+            }
+        }, this);
+
+        return this;
+    },
+
+
+    /**
+     * Строит название сноску с названием сектора
+     * @param {Object} val
+     * @param {String} options.x
+     * @param {String} options.y
+     * @param {String} options.radius
+     * @param {String} options.startDegree
+     * @param {String} options.endDegree
+     * @param {Object} [$container]
+     * @return {Number}
+     */
+    _renderSectorName: function (val, options, $container) {
+
+        var centerDegree = (options.endDegree + options.startDegree) / 2;
+        var isLeftSide = centerDegree > Math.PI / 2 && centerDegree < Math.PI * 1.5;
+        var isTopSide = centerDegree > Math.PI;
+        var sectorArcCenter = {
+            x: options.x + options.radius * Math.cos(centerDegree),
+            y: options.y + options.radius * Math.sin(centerDegree)
+        };
+        var secondPoint = {
+            x: Math.round(sectorArcCenter.x + (isLeftSide ? -options.footnotePointsMargin : options.footnotePointsMargin)),
+            y: Math.round(sectorArcCenter.y + (isTopSide ? -options.footnotePointsMargin : options.footnotePointsMargin)) + 0.5
+        };
+
+        // наклонная часть сноски
+        this._render('line', {
+            x1: sectorArcCenter.x,
+            y1: sectorArcCenter.y,
+            x2: secondPoint.x,
+            y2: secondPoint.y,
+            'class': this.options.sectorFootnote + ' ' + (val['class'] || '')
+        }, $container);
+
+        var textPosition = {
+            x: secondPoint.x + (isLeftSide ? -options.footnotePointsMargin : options.footnotePointsMargin) / 2,
+            y: secondPoint.y
+        };
+
+        // выводим текст
+        var $textEl = this._render('text', {
+            x: textPosition.x,
+            y: textPosition.y,
+            'class': this.options.sectorNameClass + ' ' + (val['class'] || ''),
+            'text-anchor': (isLeftSide ? 'end' : 'start')
+        }, $container);
+        // перемещаем элемент
+        textPosition.y += -$textEl.css('font-size').toString().replace(/[^0-9]/g, '') - 3;
+        $textEl.attr('y', textPosition.y);
+        this._appendTextNodes(val.name, textPosition, $textEl);
+
+        // прямая часть сноски
+        var footnoteLength = options.footnoteLength || ($textEl[0].offsetWidth ? $textEl[0].offsetWidth + options.footnotePointsMargin : this.options.footnoteLength);
+        this._render('line', {
+            x1: secondPoint.x,
+            y1: secondPoint.y,
+            x2: secondPoint.x + (isLeftSide ? -footnoteLength : footnoteLength),
+            y2: secondPoint.y,
+            'class': this.options.sectorFootnote + ' ' + (val['class'] || '')
+        }, $container);
     }
 });
 
@@ -989,7 +1101,7 @@ _.extend(window.Graph.prototype, {
 
 
     /**
-     * Вывод графика в виде диаграммы
+     * Вывод значений столбцов
      * @param  values [{Object|Number}]
      * @param [options] {Object} {
      *    paddingLeft:  0,    // px

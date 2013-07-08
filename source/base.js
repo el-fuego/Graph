@@ -55,6 +55,12 @@ window.Graph.prototype = {
         // Количество линий в сетке
         greedLinesCount:   5,
 
+        // Расстояние между точками в сноске
+        footnotePointsMargin:  20,
+
+        // Длинна сноски
+        footnoteLength:  200,
+
         // классы
         rectDiagramClass: 	'rect-diagram',
         circleDiagramClass: 'circle-diagram',
@@ -62,6 +68,8 @@ window.Graph.prototype = {
         rectClass: 			'rect',
         rectNameClass:  	'rect-name',
         sectorClass: 		'sector',
+        sectorNameClass:    'sector-name',
+        sectorFootnote:     'sector-footnote',
         shapeClass: 		'shape',
         lineClass: 		    'line',
         pointClass: 		'point',
@@ -156,10 +164,10 @@ window.Graph.prototype = {
         this._render('tspan', {
             x: options.x,
             y: y
-        }, $text).append(words.shift());
+        }, $text).append(options.isBottomBaseLine ? words.pop() : words.shift());
         if (words.length) {
             var word;
-            while (word = words.shift()) {
+            while (word = options.isBottomBaseLine ? words.pop() : words.shift()) {
                 y += options.isBottomBaseLine ? -dy : dy;
                 this._render('tspan', {
                     x: options.x,
@@ -226,10 +234,10 @@ window.Graph.prototype = {
      */
     _getValueShortText: function (value) {
         if (Math.abs(value / 1000000) >= 1) {
-            return (Math.round(value / 100000) / 10) + 'm';
+            return (Math.round(value / 100000) / 10) + '\nмлн.';
         }
         if (Math.abs(value / 1000) >= 1) {
-            return (Math.round(value / 100) / 10) + 'k';
+            return (Math.round(value / 100) / 10) + '\nтыс.';
         }
         return (Math.round(value * 10) / 10);
     }

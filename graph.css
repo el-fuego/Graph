@@ -19,7 +19,8 @@ svg {
     fill: #C000A8;
 }
 
-.greed-line {
+.greed-line,
+.sector-footnote {
     fill:         none;
     stroke:       #aaa;
     stroke-width: 1;
@@ -46,12 +47,16 @@ svg {
 }
 
 .rect-name,
+.sector-name,
 .value {
-	fill:         #555;
-	font-size:    12px;
-	font-weight:  bold;
-	font-family:  Arial;
-	text-anchor:  middle;
+    fill:         #555;
+    font-size:    12px;
+    font-weight:  bold;
+    font-family:  Arial;
+}
+.rect-name,
+.value {
+    text-anchor:  middle;
 }
 
 .point:hover {
