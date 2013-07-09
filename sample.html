@@ -26,13 +26,14 @@
         };
         var circleGraph = new Graph (circleGraphOptions);
 
-        var circleGraphValues = [{value: 2, name: 'cats'}, {value: 5, name: 'dogs'}, {value: 7, name: 'fishes'}, {value: 0.5, name: 'lamas'}, {value: 2, name: 'elephants'}];
+        var circleGraphValues = [{value: 7, name: 'fishes'}, {value: 2, name: 'cats'}, {value: 5, name: 'dogs'}, {value: 0.5, name: 'lamas'}, {value: 2, name: 'elephants'}];
         circleGraph.renderCircleDiagram(circleGraphValues, _.extend(
                 {},
                 circleGraphOptions,
                 {
-                    width: 300,
-                    height: 300
+                    width:  300,
+                    height: 300,
+                    startDegree: Math.PI / 4
                 }
             )
         );

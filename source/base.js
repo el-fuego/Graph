@@ -69,7 +69,7 @@ window.Graph.prototype = {
         rectNameClass:  	'rect-name',
         sectorClass: 		'sector',
         sectorNameClass:    'sector-name',
-        sectorFootnote:     'sector-footnote',
+        sectorFootnote:     'sector-name-line',
         shapeClass: 		'shape',
         lineClass: 		    'line',
         pointClass: 		'point',

@@ -69,7 +69,7 @@ window.Graph.prototype = {
         rectNameClass:  	'rect-name',
         sectorClass: 		'sector',
         sectorNameClass:    'sector-name',
-        sectorFootnote:     'sector-footnote',
+        sectorFootnote:     'sector-name-line',
         shapeClass: 		'shape',
         lineClass: 		    'line',
         pointClass: 		'point',
@@ -258,6 +258,7 @@ window.Graph.prototype = {
 /** */
 _.extend(window.Graph.prototype, {
 
+
     /**
      Создание сектора круга
      * @param {Object} val
@@ -304,8 +305,8 @@ _.extend(window.Graph.prototype, {
         graphOptions.radius = _.min([graphOptions.graphHeight, graphOptions.graphWidth]) / 2;
         graphOptions.x = this.options.width / 2;
         graphOptions.y = -this.options.height / 2;
-        graphOptions.startDegree = 0;
-        graphOptions.endDegree = 0;
+        graphOptions.startDegree =  graphOptions.startDegree || 0;
+        graphOptions.endDegree = graphOptions.startDegree || 0;
         graphOptions.footnotePointsMargin = options.footnotePointsMargin || this.options.footnotePointsMargin;
 
         return graphOptions;
@@ -316,25 +317,20 @@ _.extend(window.Graph.prototype, {
      * Получение параметров сектора круговой диаграммы
      * @return {Object}
      */
-    _getSectorOptions: function (val, index, graphOptions) {
+    _getSectorOptions: function (val, index, graphOptions, previousSectorOptions) {
 
-        var sectorOptions = {
+        return {
             'class':              this.options.sectorClass + ' n' + index + (val['class'] || ''),
             value:                this._getValue(val),
             name:                 val.name,
-            startDegree:          graphOptions.endDegree,
-            endDegree:            graphOptions.endDegree + (this._getValue(val)) * 2 * Math.PI / graphOptions.valuesTotal,
+            startDegree:          previousSectorOptions.endDegree,
+            endDegree:            previousSectorOptions.endDegree + (this._getValue(val)) * 2 * Math.PI / graphOptions.valuesTotal,
             radius:               graphOptions.radius,
             x:                    graphOptions.x,
             y:                    graphOptions.y,
             footnotePointsMargin: graphOptions.footnotePointsMargin,
             footnoteLength:       graphOptions.footnoteLength
         };
-
-        graphOptions.startDegree = sectorOptions.startDegree;
-        graphOptions.endDegree = sectorOptions.endDegree;
-
-        return sectorOptions;
     },
 
 
@@ -345,10 +341,11 @@ _.extend(window.Graph.prototype, {
      *    width:        200,  // px
      *    height:       200,  // px
      *    maxValue:     10,
+     *    startDegree:  Math.PI / 2,
      *    valuesTotal:  100,
      *    'class':      ''
      * }
-     * @return [{DOMNode}}
+     * @return {this}
      */
     renderCircleDiagram: function (values, options) {
 
@@ -356,6 +353,7 @@ _.extend(window.Graph.prototype, {
 
         // Параметры вывода
         var graphOptions = this._getCircleDiagramOptions(values, options || {});
+        var previousSectorOptions = graphOptions;
 
         // Выводим группу
         var $group = this._render('g', {
@@ -370,9 +368,10 @@ _.extend(window.Graph.prototype, {
         // Выведем каждый элемент диаграммы
         _.map(values, function (val, i) {
 
-            var sectorOptions = this._getSectorOptions(val, i, graphOptions);
+            var sectorOptions = this._getSectorOptions(val, i, graphOptions, previousSectorOptions);
+            previousSectorOptions = sectorOptions;
 
-            // Выведем сектор
+                // Выведем сектор
             self._renderSector(val, sectorOptions, $group);
 
             if (sectorOptions.name != null) {
@@ -385,6 +384,46 @@ _.extend(window.Graph.prototype, {
 
 
     /**
+     * Вывод текста названия сектора
+     * @param {Object} val
+     * @param {String} options.x
+     * @param {String} options.y
+     * @param {String} options.radius
+     * @param {String} options.startDegree
+     * @param {String} options.endDegree
+     * @param {String} options.isLeftSide
+     * @param {String} options.sectorArcCenter
+     * @param {String} options.sectorArcCenter.x
+     * @param {String} options.sectorArcCenter.y
+     * @param {Object} [$container]
+     * @returns {jQuery}
+     * @private
+     */
+    _renderSectorNameText: function (val, options, $container) {
+
+        var textPosition = {
+            x: options.x + (options.isLeftSide ? -options.footnotePointsMargin : options.footnotePointsMargin) / 2,
+            y: options.y
+        };
+
+        // выводим текст
+        var $textEl = this._render('text', {
+            x: textPosition.x,
+            y: textPosition.y,
+            'class': this.options.sectorNameClass + ' ' + (val['class'] || ''),
+            'text-anchor': (options.isLeftSide ? 'end' : 'start')
+        }, $container);
+
+        // перемещаем элемент
+        textPosition.y += -$textEl.css('font-size').toString().replace(/[^0-9]/g, '') - 3;
+        $textEl.attr('y', textPosition.y);
+        this._appendTextNodes(val.name, textPosition, $textEl);
+
+        return $textEl;
+    },
+
+
+    /**
      * Строит название сноску с названием сектора
      * @param {Object} val
      * @param {String} options.x
@@ -392,14 +431,19 @@ _.extend(window.Graph.prototype, {
      * @param {String} options.radius
      * @param {String} options.startDegree
      * @param {String} options.endDegree
+     * @param {String} [options.footnoteLength]
+     * @param {String} [options.footnotePointsMargin]
      * @param {Object} [$container]
-     * @return {Number}
      */
     _renderSectorName: function (val, options, $container) {
 
         var centerDegree = (options.endDegree + options.startDegree) / 2;
-        var isLeftSide = centerDegree > Math.PI / 2 && centerDegree < Math.PI * 1.5;
-        var isTopSide = centerDegree > Math.PI;
+        var centerDegreePerCircle = centerDegree;
+        while (centerDegreePerCircle > Math.PI * 2) {
+            centerDegreePerCircle += -Math.PI * 2;
+        }
+        var isLeftSide = centerDegreePerCircle > Math.PI / 2 && centerDegreePerCircle < Math.PI * 1.5;
+        var isTopSide = centerDegreePerCircle > Math.PI;
         var sectorArcCenter = {
             x: options.x + options.radius * Math.cos(centerDegree),
             y: options.y + options.radius * Math.sin(centerDegree)
@@ -418,25 +462,19 @@ _.extend(window.Graph.prototype, {
             'class': this.options.sectorFootnote + ' ' + (val['class'] || '')
         }, $container);
 
-        var textPosition = {
-            x: secondPoint.x + (isLeftSide ? -options.footnotePointsMargin : options.footnotePointsMargin) / 2,
-            y: secondPoint.y
-        };
 
-        // выводим текст
-        var $textEl = this._render('text', {
-            x: textPosition.x,
-            y: textPosition.y,
-            'class': this.options.sectorNameClass + ' ' + (val['class'] || ''),
-            'text-anchor': (isLeftSide ? 'end' : 'start')
-        }, $container);
-        // перемещаем элемент
-        textPosition.y += -$textEl.css('font-size').toString().replace(/[^0-9]/g, '') - 3;
-        $textEl.attr('y', textPosition.y);
-        this._appendTextNodes(val.name, textPosition, $textEl);
+        // текст
+        var $textEl = this._renderSectorNameText(val, _.extend({}, options, {
+            centerDegree: centerDegree,
+            sectorArcCenter: sectorArcCenter,
+            isLeftSide:   isLeftSide,
+            isTopSide:   isTopSide,
+            x: secondPoint.x,
+            y: secondPoint.y
+        }), $container);
 
         // прямая часть сноски
-        var footnoteLength = options.footnoteLength || ($textEl[0].offsetWidth ? $textEl[0].offsetWidth + options.footnotePointsMargin : this.options.footnoteLength);
+        var footnoteLength = options.footnoteLength || ($textEl[0] && $textEl[0].offsetWidth ? $textEl[0].offsetWidth + options.footnotePointsMargin : this.options.footnoteLength);
         this._render('line', {
             x1: secondPoint.x,
             y1: secondPoint.y,
@@ -674,7 +712,7 @@ _.extend(window.Graph.prototype, {
      *    graphHeight:  200,
      *    maxValue:     10
      * }
-     * @return [{DOMNode}}
+     * @return ['1,5', '2,3']
      */
     _getGraphPoints: function (values, options) {
 
@@ -714,7 +752,7 @@ _.extend(window.Graph.prototype, {
      *    step:         10,  // px
      *    'class':      ''
      * }
-     * @return [{DOMNode}}
+     * @return {this}
      */
     renderShape: function (values, options) {
 
@@ -758,7 +796,7 @@ _.extend(window.Graph.prototype, {
      *    step:         10,  // px
      *    'class':      ''
      * }
-     * @return [{DOMNode}}
+     * @return {this}
      */
     renderLine: function (values, options) {
 
@@ -791,7 +829,7 @@ _.extend(window.Graph.prototype, {
      *    pointDiameter: 20, // px
      *    'class':      ''
      * }
-     * @return [{DOMNode}}
+     * @return {this}
      */
     renderPoints: function (values, options) {
 
@@ -836,7 +874,7 @@ _.extend(window.Graph.prototype, {
      *    fullText:     false,
      *    'class':      ''
      * }
-     * @return [{DOMNode}}
+     * @return {this}
      */
     renderPointsValues: function (values, options) {
 
@@ -1068,7 +1106,7 @@ _.extend(window.Graph.prototype, {
      *    rectWidth:    20,   // px
      *    'class':      ''
      * }
-     * @return [{DOMNode}}
+     * @return {this}
      */
     renderRectDiagram: function (values, options) {
 
@@ -1113,7 +1151,7 @@ _.extend(window.Graph.prototype, {
      *    fullText:     false,
      *    'class':      ''
      * }
-     * @return [{DOMNode}}
+     * @return {this}
      */
     renderRectsValues: function (values, options) {
 

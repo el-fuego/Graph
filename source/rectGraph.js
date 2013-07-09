@@ -179,7 +179,7 @@ _.extend(window.Graph.prototype, {
      *    rectWidth:    20,   // px
      *    'class':      ''
      * }
-     * @return [{DOMNode}}
+     * @return {this}
      */
     renderRectDiagram: function (values, options) {
 
@@ -224,7 +224,7 @@ _.extend(window.Graph.prototype, {
      *    fullText:     false,
      *    'class':      ''
      * }
-     * @return [{DOMNode}}
+     * @return {this}
      */
     renderRectsValues: function (values, options) {
 

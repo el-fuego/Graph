@@ -38,7 +38,7 @@ _.extend(window.Graph.prototype, {
      *    graphHeight:  200,
      *    maxValue:     10
      * }
-     * @return [{DOMNode}}
+     * @return ['1,5', '2,3']
      */
     _getGraphPoints: function (values, options) {
 
@@ -78,7 +78,7 @@ _.extend(window.Graph.prototype, {
      *    step:         10,  // px
      *    'class':      ''
      * }
-     * @return [{DOMNode}}
+     * @return {this}
      */
     renderShape: function (values, options) {
 
@@ -122,7 +122,7 @@ _.extend(window.Graph.prototype, {
      *    step:         10,  // px
      *    'class':      ''
      * }
-     * @return [{DOMNode}}
+     * @return {this}
      */
     renderLine: function (values, options) {
 
@@ -155,7 +155,7 @@ _.extend(window.Graph.prototype, {
      *    pointDiameter: 20, // px
      *    'class':      ''
      * }
-     * @return [{DOMNode}}
+     * @return {this}
      */
     renderPoints: function (values, options) {
 
@@ -200,7 +200,7 @@ _.extend(window.Graph.prototype, {
      *    fullText:     false,
      *    'class':      ''
      * }
-     * @return [{DOMNode}}
+     * @return {this}
      */
     renderPointsValues: function (values, options) {
 
