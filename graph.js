@@ -1,7 +1,7 @@
 /* ********************************* */
 //    Построение графиков и диаграмм 
 //    JavaScript + SVG
-//
+//    https://github.com/el-fuego/Graph
 //
 //    Author:   Pulyaev Y.A.
 //
@@ -60,6 +60,12 @@ window.Graph.prototype = {
 
         // Длинна сноски
         footnoteLength:  200,
+
+        // Если секторов больше, чем минимальное кол-во и длинна дуги слишком маленькая, то у сноски будет сделать дополнительный отступ
+        // Минимальное количество секторов
+        minSectorsCountForResize:  4,
+        // Минимальная длинна дуги, град
+        arcLengthForResize:  5,
 
         // классы
         rectDiagramClass: 	'rect-diagram',
@@ -246,6 +252,7 @@ window.Graph.prototype = {
 /* ********************************* */
 //    Построение графиков и диаграмм 
 //    JavaScript + SVG
+//    https://github.com/el-fuego/Graph
 //
 //
 //    Author:   Pulyaev Y.A.
@@ -253,6 +260,7 @@ window.Graph.prototype = {
 //    Email:    watt87@mail.ru
 //    VK:       el_fuego_zaz
 /* ********************************* */
+
 
 
 /** */
@@ -349,7 +357,8 @@ _.extend(window.Graph.prototype, {
      */
     renderCircleDiagram: function (values, options) {
 
-        var self = this;
+        var self = this,
+            sectorsCount;
 
         // Параметры вывода
         var graphOptions = this._getCircleDiagramOptions(values, options || {});
@@ -365,11 +374,15 @@ _.extend(window.Graph.prototype, {
         // Эффект
         this._renderRadialGradient($group);
 
+        sectorsCount = values.length;
+
         // Выведем каждый элемент диаграммы
         _.map(values, function (val, i) {
 
             var sectorOptions = this._getSectorOptions(val, i, graphOptions, previousSectorOptions);
             previousSectorOptions = sectorOptions;
+
+            sectorOptions.sectorsCount = sectorsCount;
 
                 // Выведем сектор
             self._renderSector(val, sectorOptions, $group);
@@ -437,8 +450,9 @@ _.extend(window.Graph.prototype, {
      */
     _renderSectorName: function (val, options, $container) {
 
-        var centerDegree = (options.endDegree + options.startDegree) / 2;
-        var centerDegreePerCircle = centerDegree;
+        var centerDegree = (options.endDegree + options.startDegree) / 2,
+            centerDegreePerCircle = centerDegree;
+
         while (centerDegreePerCircle > Math.PI * 2) {
             centerDegreePerCircle += -Math.PI * 2;
         }
@@ -452,6 +466,17 @@ _.extend(window.Graph.prototype, {
             x: Math.round(sectorArcCenter.x + (isLeftSide ? -options.footnotePointsMargin : options.footnotePointsMargin)),
             y: Math.round(sectorArcCenter.y + (isTopSide ? -options.footnotePointsMargin : options.footnotePointsMargin)) + 0.5
         };
+
+        /**
+         * Если секторов больше, чем минимальное кол-во и длинна дуги слишком маленькая,
+         * то нужно сделать дополнительный отступ для сноски
+         */
+        if (
+            options.sectorsCount >= this.options.minSectorsCountForResize &&
+                Math.round((Math.PI * options.radius * centerDegreePerCircle) / 180) < this.options.arcLengthForResize
+        ) {
+            secondPoint.y += isTopSide ? -options.footnotePointsMargin : options.footnotePointsMargin;
+        }
 
         // наклонная часть сноски
         this._render('line', {
@@ -488,6 +513,7 @@ _.extend(window.Graph.prototype, {
 /* ********************************* */
 //    Построение графиков и диаграмм 
 //    JavaScript + SVG
+//    https://github.com/el-fuego/Graph
 //
 //
 //    Author:   Pulyaev Y.A.
@@ -579,6 +605,7 @@ _.extend(window.Graph.prototype, {
 /* ********************************* */
 //    Построение графиков и диаграмм 
 //    JavaScript + SVG
+//    https://github.com/el-fuego/Graph
 //
 //
 //    Author:   Pulyaev Y.A.
@@ -675,6 +702,7 @@ _.extend(window.Graph.prototype, {
 /* ********************************* */
 //    Построение графиков и диаграмм 
 //    JavaScript + SVG
+//    https://github.com/el-fuego/Graph
 //
 //
 //    Author:   Pulyaev Y.A.
@@ -928,6 +956,7 @@ _.extend(window.Graph.prototype, {
 /* ********************************* */
 //    Построение графиков и диаграмм 
 //    JavaScript + SVG
+//    https://github.com/el-fuego/Graph
 //
 //
 //    Author:   Pulyaev Y.A.

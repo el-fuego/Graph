@@ -1,7 +1,7 @@
 /* ********************************* */
 //    Построение графиков и диаграмм 
 //    JavaScript + SVG
-//
+//    https://github.com/el-fuego/Graph
 //
 //    Author:   Pulyaev Y.A.
 //
@@ -60,6 +60,12 @@ window.Graph.prototype = {
 
         // Длинна сноски
         footnoteLength:  200,
+
+        // Если секторов больше, чем минимальное кол-во и длинна дуги слишком маленькая, то у сноски будет сделать дополнительный отступ
+        // Минимальное количество секторов
+        minSectorsCountForResize:  4,
+        // Минимальная длинна дуги, град
+        arcLengthForResize:  5,
 
         // классы
         rectDiagramClass: 	'rect-diagram',

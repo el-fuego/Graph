@@ -1,6 +1,7 @@
 /* ********************************* */
 //    Построение графиков и диаграмм 
 //    JavaScript + SVG
+//    https://github.com/el-fuego/Graph
 //
 //
 //    Author:   Pulyaev Y.A.
