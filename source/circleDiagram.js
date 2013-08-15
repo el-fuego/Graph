@@ -34,15 +34,14 @@ _.extend(window.Graph.prototype, {
             options.endDegree = options.startDegree - 0.00001 + Math.PI * 2;
         }
 
-        return this._render('path', {
+        return this._render('path', _.extend({}, options, {
             d: 'M ' + options.x + ',' + options.y + ' ' +
                 'l ' + (options.radius * Math.cos(options.startDegree)) +
                     ',' + (options.radius * Math.sin(options.startDegree)) + ' ' +
                 'A ' + options.radius + ',' + options.radius + ',0,' + (isOutAngle ? '1' : '0') + ',1,' +
                    (options.x + options.radius * Math.cos(options.endDegree)) + ',' +
-                   (options.y + options.radius * Math.sin(options.endDegree)) + ' z',
-            'class': options['class']
-        }, $container);
+                   (options.y + options.radius * Math.sin(options.endDegree)) + ' z'
+        }), $container);
     },
 
 
@@ -76,18 +75,22 @@ _.extend(window.Graph.prototype, {
      */
     _getSectorOptions: function (val, index, graphOptions, previousSectorOptions) {
 
-        return {
-            'class':              this.options.sectorClass + ' n' + index + (val['class'] || ''),
-            value:                this._getValue(val),
-            name:                 val.name,
-            startDegree:          previousSectorOptions.endDegree,
-            endDegree:            previousSectorOptions.endDegree + (this._getValue(val)) * 2 * Math.PI / graphOptions.valuesTotal,
-            radius:               graphOptions.radius,
-            x:                    graphOptions.x,
-            y:                    graphOptions.y,
-            footnotePointsMargin: graphOptions.footnotePointsMargin,
-            footnoteLength:       graphOptions.footnoteLength
-        };
+        return _.extend(
+            {},
+            typeof val === 'object' ? val : {},
+            {
+                'class':              this.options.sectorClass + ' n' + index + " " + (val['class'] || ''),
+                value:                this._getValue(val),
+                name:                 val.name,
+                startDegree:          previousSectorOptions.endDegree,
+                endDegree:            previousSectorOptions.endDegree + (this._getValue(val)) * 2 * Math.PI / graphOptions.valuesTotal,
+                radius:               graphOptions.radius,
+                x:                    graphOptions.x,
+                y:                    graphOptions.y,
+                footnotePointsMargin: graphOptions.footnotePointsMargin,
+                footnoteLength:       graphOptions.footnoteLength
+            }
+        );
     },
 
 
