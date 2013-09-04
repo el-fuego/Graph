@@ -210,7 +210,7 @@ window.Graph.prototype = {
      * @private
      */
     _getValue: function (val) {
-         return (typeof val === 'object' ? val.value || 0 : val || 0);
+         return (typeof val === 'object' ? val.value : val) || 0;
     },
 
 

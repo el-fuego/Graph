@@ -210,7 +210,7 @@ window.Graph.prototype = {
      * @private
      */
     _getValue: function (val) {
-         return (typeof val === 'object' ? val.value || 0 : val || 0);
+         return (typeof val === 'object' ? val.value : val) || 0;
     },
 
 
@@ -922,9 +922,9 @@ _.extend(window.Graph.prototype, {
 
         _.each(values, function (val, i) {
 
-            var position = graphOptions.paddingTop +
+            var position = (graphOptions.paddingTop +
                            self.options.valueOffsetY + graphOptions.pointRadius +
-                           (self._getValue(val)) * graphOptions.graphHeight / graphOptions.maxValue;
+                           (self._getValue(val)) * graphOptions.graphHeight / graphOptions.maxValue) || 0;
             var x = graphOptions.paddingLeft + graphOptions.step * i;
             var $text = self._render(
                 'text',
@@ -1020,7 +1020,7 @@ _.extend(window.Graph.prototype, {
                             graphOptions.rectWidth(val, index, graphOptions.defaultRectWidth) :
                             Math.round(graphOptions.rectWidth);
 
-        rectOptions.height = Math.round((this._getValue(val)) * graphOptions.graphHeight / graphOptions.maxValue);
+        rectOptions.height = Math.round((this._getValue(val)) * graphOptions.graphHeight / graphOptions.maxValue) || 0;
         rectOptions.x = graphOptions.previousEndsX;
         rectOptions.y = -graphOptions.paddingTop - rectOptions.height;
         graphOptions.previousEndsX = rectOptions.x + currentStep + rectOptions.width;

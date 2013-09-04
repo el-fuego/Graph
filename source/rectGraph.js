@@ -62,7 +62,7 @@ _.extend(window.Graph.prototype, {
                             graphOptions.rectWidth(val, index, graphOptions.defaultRectWidth) :
                             Math.round(graphOptions.rectWidth);
 
-        rectOptions.height = Math.round((this._getValue(val)) * graphOptions.graphHeight / graphOptions.maxValue);
+        rectOptions.height = Math.round((this._getValue(val)) * graphOptions.graphHeight / graphOptions.maxValue) || 0;
         rectOptions.x = graphOptions.previousEndsX;
         rectOptions.y = -graphOptions.paddingTop - rectOptions.height;
         graphOptions.previousEndsX = rectOptions.x + currentStep + rectOptions.width;

@@ -218,9 +218,9 @@ _.extend(window.Graph.prototype, {
 
         _.each(values, function (val, i) {
 
-            var position = graphOptions.paddingTop +
+            var position = (graphOptions.paddingTop +
                            self.options.valueOffsetY + graphOptions.pointRadius +
-                           (self._getValue(val)) * graphOptions.graphHeight / graphOptions.maxValue;
+                           (self._getValue(val)) * graphOptions.graphHeight / graphOptions.maxValue) || 0;
             var x = graphOptions.paddingLeft + graphOptions.step * i;
             var $text = self._render(
                 'text',
