@@ -456,6 +456,10 @@ _.extend(window.Graph.prototype,
                 centerDegree = (options.endDegree + options.startDegree) / 2,
                 centerDegreePerCircle = centerDegree,
                 /**
+                 * отступ для сноски, используется опционально
+                 */
+                footnoteMargin = options.footnotePointsMargin,
+                /**
                  * внутренний угол. Приведем к градусам
                  */
                 insideCorner = (options.endDegree - options.startDegree) * 180 / Math.PI,
@@ -485,8 +489,8 @@ _.extend(window.Graph.prototype,
             if (
                 options.sectorsCount >= this.options.minSectorsCountForFootnoteResize &&
                     sectorArcLength < this.options.sectorArcLengthForFootnoteResize
-                ) {
-                secondPoint.y += isTopSide ? -options.footnotePointsMargin : options.footnotePointsMargin;
+            ) {
+                secondPoint.y += (sectorArcLength < 10 ? 2 : 1) * (isTopSide ? -footnoteMargin : footnoteMargin);
             }
 
             // наклонная часть сноски
