@@ -77,6 +77,6 @@ module.exports = function (grunt) {
      * Сборка JS-интерфейса
      */
     grunt.registerTask('default', [
-        'concat', 'uglify', 'compress', 'watch'
+        'concat', 'uglify', 'compress'//, 'watch'
     ]);
 };
