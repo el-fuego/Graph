@@ -36,12 +36,12 @@ window.Graph.prototype = {
     options: {
 
         // Ширина и высота графика
-        width:         450,
-        height:        140,
+        width: 450,
+        height: 140,
 
         // Отступы
-        paddingLeft:   20.5,
-        paddingTop:    20.5,
+        paddingLeft: 20.5,
+        paddingTop: 20.5,
 
         // Размер точки на линейном графике
         pointDiameter: 8,
@@ -50,39 +50,39 @@ window.Graph.prototype = {
         valueOffsetY: 4,
 
         // Расстояние между столбцами
-        rectStep:   5,
+        rectStep: 5,
 
         // Количество линий в сетке
-        greedLinesCount:   5,
+        greedLinesCount: 5,
 
         // Расстояние между точками в сноске
-        footnotePointsMargin:  20,
+        footnotePointsMargin: 20,
 
         // Длинна сноски
-        footnoteLength:  200,
+        footnoteLength: 200,
 
         // Если секторов больше, чем минимальное кол-во и длинна дуги слишком маленькая, то у сноски будет сделать дополнительный отступ
-        // Минимальное количество секторов
-        minSectorsCountForResize:  4,
-        // Минимальная длинна дуги, град
-        arcLengthForResize:  5,
+        // Минимальное количество секторов для изменения размера сноски
+        minSectorsCountForFootnoteResize: 4,
+        // Длинна дуги сектора для изменения размера сноски
+        sectorArcLengthForFootnoteResize: 50,
 
         // классы
-        rectDiagramClass: 	'rect-diagram',
+        rectDiagramClass: 'rect-diagram',
         circleDiagramClass: 'circle-diagram',
         verticalGreedClass: 'vertical-greed',
-        rectClass: 			'rect',
-        rectNameClass:  	'rect-name',
-        sectorClass: 		'sector',
-        sectorNameClass:    'sector-name',
-        sectorFootnote:     'sector-name-line',
-        shapeClass: 		'shape',
-        lineClass: 		    'line',
-        pointClass: 		'point',
-        valueClass: 		'value',
-        greedLineClass: 	'greed-line',
+        rectClass: 'rect',
+        rectNameClass: 'rect-name',
+        sectorClass: 'sector',
+        sectorNameClass: 'sector-name',
+        sectorFootnote: 'sector-name-line',
+        shapeClass: 'shape',
+        lineClass: 'line',
+        pointClass: 'point',
+        valueClass: 'value',
+        greedLineClass: 'greed-line',
 
-        backgroundColor: 	'#F5F5F5'
+        backgroundColor: '#F5F5F5'
     },
 
 
@@ -122,13 +122,12 @@ window.Graph.prototype = {
                 $('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" ></svg>')
                     .attr({
 
-                        width:  this.options.width,
+                        width: this.options.width,
                         height: this.options.height
                     })
                     .appendTo(this.$el)
             );
     },
-
 
 
     /**
@@ -192,11 +191,11 @@ window.Graph.prototype = {
     _mergeGraphOptions: function (options) {
         var ret = {
             paddingLeft: options.paddingLeft != null ? options.paddingLeft : this.options.paddingLeft,
-            paddingTop:  options.paddingTop  != null ? options.paddingTop  : this.options.paddingTop
+            paddingTop: options.paddingTop != null ? options.paddingTop : this.options.paddingTop
         };
 
-        ret.graphWidth =  options.width  || (this.options.width - ret.paddingLeft*2);
-        ret.graphHeight = options.height || (this.options.height - ret.paddingTop*2);
+        ret.graphWidth = options.width || (this.options.width - ret.paddingLeft * 2);
+        ret.graphHeight = options.height || (this.options.height - ret.paddingTop * 2);
         return _.extend(
             {},
             options,
@@ -210,7 +209,7 @@ window.Graph.prototype = {
      * @private
      */
     _getValue: function (val) {
-         return (typeof val === 'object' ? val.value : val) || 0;
+        return (typeof val === 'object' ? val.value : val) || 0;
     },
 
 

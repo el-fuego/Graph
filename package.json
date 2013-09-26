@@ -1,9 +1,36 @@
 {
-  "devDependencies": {
-    "grunt": "~0.4.0",
-    "grunt-contrib-uglify": "~0.2.0",
-    "grunt-contrib-concat": "~0.3.0",
-    "grunt-contrib-compress": "~0.5.0",
-    "grunt-contrib-watch": "~0.3.1"
-  }
+    "name": "Graph",
+    "description": "",
+    "version": "1.01.",
+    "homepage": "https://github.com/el-fuego/Graph.git",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:el-fuego/Graph.git"
+    },
+    "bugs": {
+        "url": "https://github.com/github.com/el-fuego/Graph.git/issues"
+    },
+    "licenses": [
+        {
+            "type": "MIT",
+            "url": "https://github.com/webschik/grunt-templates-concat/blob/master/LICENSE.md"
+        }
+    ],
+    "main": "Gruntfile.js",
+    "engines": {
+        "node": ">= 0.8.0"
+    },
+    "scripts": {
+        "test": "grunt test"
+    },
+    "devDependencies": {
+        "grunt": "~0.4.1",
+        "grunt-contrib-uglify": "~0.2.0",
+        "grunt-contrib-concat": "~0.3.0",
+        "grunt-contrib-compress": "~0.5.0",
+        "grunt-contrib-watch": "~0.3.1"
+    },
+    "keywords": [
+        "graph"
+    ]
 }
