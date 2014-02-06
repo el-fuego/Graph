@@ -453,8 +453,12 @@ _.extend(window.Graph.prototype,
                 isTopSide,
                 sectorArcCenter,
                 secondPoint,
+                factor,
+                sectorArcLengthForFootnoteResize = this.options.sectorArcLengthForFootnoteResize,
                 centerDegree = (options.endDegree + options.startDegree) / 2,
                 centerDegreePerCircle = centerDegree,
+                previousSectorNameRenderResult = options.previousSectorNameRenderResult,
+
                 /**
                  * отступ для сноски, используется опционально
                  */
@@ -488,9 +492,25 @@ _.extend(window.Graph.prototype,
              */
             if (
                 options.sectorsCount >= this.options.minSectorsCountForFootnoteResize &&
-                    sectorArcLength < this.options.sectorArcLengthForFootnoteResize
+                    sectorArcLength < sectorArcLengthForFootnoteResize && (
+                        !previousSectorNameRenderResult ||
+                            previousSectorNameRenderResult.sectorArcLength < sectorArcLengthForFootnoteResize
+                    )
             ) {
-                secondPoint.y += (sectorArcLength < 10 ? 2 : 1) * (isTopSide ? -footnoteMargin : footnoteMargin);
+                if (
+                    sectorArcLength < 10 || (
+                        previousSectorNameRenderResult &&
+                            previousSectorNameRenderResult.sectorArcLength < sectorArcLengthForFootnoteResize &&
+                            previousSectorNameRenderResult.isTopSide === isTopSide &&
+                            previousSectorNameRenderResult.isLeftSide === isLeftSide
+                    )
+                ) {
+                    factor = 2;
+                } else {
+                    factor = 1;
+                }
+
+                secondPoint.y += factor * (isTopSide ? -footnoteMargin : footnoteMargin);
             }
 
             // наклонная часть сноски
@@ -522,9 +542,14 @@ _.extend(window.Graph.prototype,
                 y2: secondPoint.y,
                 'class': this.options.sectorFootnote + ' ' + (val['class'] || '')
             }, $container);
+
+            return {
+                sectorArcLength: sectorArcLength,
+                isTopSide: isTopSide,
+                isLeftSide: isLeftSide
+            };
         }
-    }
-);
+    });
 /* ********************************* */
 //    Построение графиков и диаграмм 
 //    JavaScript + SVG
