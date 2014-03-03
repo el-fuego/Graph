@@ -249,7 +249,14 @@ _.extend(window.Graph.prototype,
                 options.sectorsCount >= this.options.minSectorsCountForFootnoteResize &&
                     sectorArcLength < sectorArcLengthForFootnoteResize && (
                         !previousSectorNameRenderResult ||
-                            previousSectorNameRenderResult.sectorArcLength < sectorArcLengthForFootnoteResize
+                            previousSectorNameRenderResult.sectorArcLength < sectorArcLengthForFootnoteResize || (
+                                previousSectorNameRenderResult && (
+                                /**
+                                 * две коротких дуги
+                                 */
+                                    Math.abs(previousSectorNameRenderResult.sectorArcLength - sectorArcLength) <= 10
+                                )
+                            )
                     )
             ) {
                 if (

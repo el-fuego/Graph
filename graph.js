@@ -357,19 +357,21 @@ _.extend(window.Graph.prototype,
         renderCircleDiagram: function (values, options) {
 
             var self = this,
-                sectorsCount;
+                sectorsCount,
 
             // Параметры вывода
-            var graphOptions = this._getCircleDiagramOptions(values, options || {});
-            var previousSectorOptions = graphOptions;
+                graphOptions = this._getCircleDiagramOptions(values, options || {}),
+                previousSectorOptions = graphOptions,
+                previousSectorNameRenderResult,
 
             // Выводим группу
-            var $group = this._render('g', {
-                'class': this.options.circleDiagramClass + (graphOptions['class'] || '')
-            });
-            var $namesGroup = this._render('g', {
-                'class': this.options.circleDiagramClass + (graphOptions['class'] || '')
-            });
+                $group = this._render('g', {
+                    'class': this.options.circleDiagramClass + (graphOptions['class'] || '')
+                }),
+                $namesGroup = this._render('g', {
+                    'class': this.options.circleDiagramClass + (graphOptions['class'] || '')
+                });
+
             // Эффект
             this._renderRadialGradient($group);
 
@@ -382,12 +384,15 @@ _.extend(window.Graph.prototype,
                 previousSectorOptions = sectorOptions;
 
                 sectorOptions.sectorsCount = sectorsCount;
+                sectorOptions.previousSectorNameRenderResult = previousSectorNameRenderResult;
 
                 // Выведем сектор
                 self._renderSector(val, sectorOptions, $group);
 
                 if (sectorOptions.name != null) {
-                    self._renderSectorName(val, sectorOptions, $namesGroup);
+                    previousSectorNameRenderResult = self._renderSectorName(val, sectorOptions, $namesGroup);
+                } else {
+                    previousSectorNameRenderResult = null;
                 }
             }, this);
 
@@ -494,7 +499,14 @@ _.extend(window.Graph.prototype,
                 options.sectorsCount >= this.options.minSectorsCountForFootnoteResize &&
                     sectorArcLength < sectorArcLengthForFootnoteResize && (
                         !previousSectorNameRenderResult ||
-                            previousSectorNameRenderResult.sectorArcLength < sectorArcLengthForFootnoteResize
+                            previousSectorNameRenderResult.sectorArcLength < sectorArcLengthForFootnoteResize || (
+                                previousSectorNameRenderResult && (
+                                /**
+                                 * две коротких дуги
+                                 */
+                                    Math.abs(previousSectorNameRenderResult.sectorArcLength - sectorArcLength) <= 10
+                                )
+                            )
                     )
             ) {
                 if (
