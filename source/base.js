@@ -67,6 +67,11 @@ window.Graph.prototype = {
         // Длинна дуги сектора для изменения размера сноски
         sectorArcLengthForFootnoteResize: 50,
 
+        /**
+         * минимальная разница между длинами соседних дуг (используется при построении сносок круговых диаграмм)
+         */
+        minAdjacentArcsLengthDifference: 30,
+
         // классы
         rectDiagramClass: 'rect-diagram',
         circleDiagramClass: 'circle-diagram',

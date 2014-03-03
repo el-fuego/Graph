@@ -254,7 +254,8 @@ _.extend(window.Graph.prototype,
                                 /**
                                  * две коротких дуги
                                  */
-                                    Math.abs(previousSectorNameRenderResult.sectorArcLength - sectorArcLength) <= 10
+                                    Math.abs(previousSectorNameRenderResult.sectorArcLength - sectorArcLength) <=
+                                        this.options.minAdjacentArcsLengthDifference
                                 )
                             )
                     )
