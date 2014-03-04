@@ -70,7 +70,7 @@ window.Graph.prototype = {
         /**
          * минимальная разница между длинами соседних дуг (используется при построении сносок круговых диаграмм)
          */
-        minAdjacentArcsLengthDifference: 30,
+        minAdjacentArcsLengthDifference: 75,
 
         // классы
         rectDiagramClass: 'rect-diagram',

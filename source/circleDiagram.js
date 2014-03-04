@@ -251,11 +251,11 @@ _.extend(window.Graph.prototype,
                         !previousSectorNameRenderResult ||
                             previousSectorNameRenderResult.sectorArcLength < sectorArcLengthForFootnoteResize || (
                                 previousSectorNameRenderResult && (
-                                /**
-                                 * две коротких дуги
-                                 */
                                     Math.abs(previousSectorNameRenderResult.sectorArcLength - sectorArcLength) <=
-                                        this.options.minAdjacentArcsLengthDifference
+                                        this.options.minAdjacentArcsLengthDifference && (
+                                            sectorArcLength < sectorArcLengthForFootnoteResize ||
+                                                previousSectorNameRenderResult.sectorArcLength < sectorArcLengthForFootnoteResize
+                                        )
                                 )
                             )
                     )

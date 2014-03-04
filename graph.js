@@ -70,7 +70,7 @@ window.Graph.prototype = {
         /**
          * минимальная разница между длинами соседних дуг (используется при построении сносок круговых диаграмм)
          */
-        minAdjacentArcsLengthDifference: 30,
+        minAdjacentArcsLengthDifference: 75,
 
         // классы
         rectDiagramClass: 'rect-diagram',
@@ -506,11 +506,11 @@ _.extend(window.Graph.prototype,
                         !previousSectorNameRenderResult ||
                             previousSectorNameRenderResult.sectorArcLength < sectorArcLengthForFootnoteResize || (
                                 previousSectorNameRenderResult && (
-                                /**
-                                 * две коротких дуги
-                                 */
                                     Math.abs(previousSectorNameRenderResult.sectorArcLength - sectorArcLength) <=
-                                        this.options.minAdjacentArcsLengthDifference
+                                        this.options.minAdjacentArcsLengthDifference && (
+                                            sectorArcLength < sectorArcLengthForFootnoteResize ||
+                                                previousSectorNameRenderResult.sectorArcLength < sectorArcLengthForFootnoteResize
+                                        )
                                 )
                             )
                     )
